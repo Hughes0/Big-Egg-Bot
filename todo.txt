@@ -1,0 +1,23 @@
+- Database
+    - SQLite
+        - easy to use
+        - already know how to use somewhat
+    - MySQL
+        - better
+        - harder to use
+        - may be more than needed
+    - JSON file
+        - easiest to use
+        - almost too lightweight
+        - has been unreliable in the past
+
+- Permissions
+    - store permissions data by server
+        - SQLite, MySQL, or json file
+    - make x number of permission levels
+    - for each server an array of role names or ids which are in each level
+    - check function that takes in array of allowed levels
+
+- Enable and disable certain features
+    - for each server, store which functions/modules are enabled
+        - SQLite, MySQL, or json file
