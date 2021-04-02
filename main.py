@@ -15,7 +15,7 @@ async def online(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isintance(error, commands.MissingRequiredArgument):
+    if isinstance(error, commands.MissingRequiredArgument):
         pass
     elif isinstance(error,commands.CheckFailure):
         await ctx.send("Check failed")
