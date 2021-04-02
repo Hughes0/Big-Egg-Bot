@@ -13,6 +13,17 @@ async def online(ctx):
     await ctx.send(f"Bot is online with latency {round(bot.latency, 3)}")
 
 
+@bot.event
+async def on_command_error(ctx, error):
+    if isintance(error, commands.MissingRequiredArgument):
+        pass
+    elif isinstance(error,commands.CheckFailure):
+        await ctx.send("Check failed")
+    elif isinstance(error,commands.CommandNotFound):
+        await ctx.send("Command not found")
+    else:
+        await ctx.send(error)
+
 
 @bot.event
 async def on_ready():
