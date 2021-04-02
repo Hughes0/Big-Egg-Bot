@@ -1,6 +1,8 @@
 import json
 import random
 import requests
+import sys
+
 
 def get_entry(key):
     with open("keys.json") as f:
@@ -8,8 +10,12 @@ def get_entry(key):
     return data[key]
 
 
-def apikey(alliance_id=None, requests_needed=1, bank_access=False):
-    with open("keys.json") as f:
+def apikey(alliance_id=None, requests_needed=1, bank_access=False, subdirectory=False):
+    if subdirectory:
+        filename = "../keys.json"
+    else:
+        filename = "keys.json"
+    with open(filename) as f:
         apikeys = json.loads(f.read())['apikeys']
     if bank_access:
         min_alliance_position = 4
