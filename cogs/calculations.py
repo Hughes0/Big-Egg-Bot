@@ -69,10 +69,10 @@ class Calculations(commands.Cog):
         failure = round(failure/10, 1)
         description = f"{att_soldiers} soldiers and {att_tanks} tanks vs\n{def_soldiers} soldiers and {def_tanks} tanks"
         embed = discord.Embed(title="Ground Battle Simulator", description=description)
-        embed.add_field(name="Immense Triumph", value=f"{immense}%", inline=False)
-        embed.add_field(name="Moderate Success", value=f"{moderate}%", inline=False)
-        embed.add_field(name="Pyrrhic Victory", value=f"{pyrrhic}%", inline=False)
-        embed.add_field(name="Utter Failure", value=f"{failure}%", inline=False)
+        embed.add_field(name=f"{immense}%", value="Immense Triumph", inline=False)
+        embed.add_field(name=f"{moderate}%", value="Moderate Success", inline=False)
+        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory", inline=False)
+        embed.add_field(name=f"{failure}%", value="Utter Failure", inline=False)
         await ctx.send(embed=embed)
 
 
