@@ -118,5 +118,30 @@ class Calculations(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}air <att planes> <def planes>`")
 
 
+    @commands.command(brief="Naval battle simulator")
+    async def naval(self, ctx, att_ships, def_ships):
+        try:
+            att_ships = int(att_ships.replace(',', ''))
+            def_ships = int(def_ships.replace(',', ''))
+        except:
+            raise ValueError("Invalid input")
+        if att_ships > 1000 or def_ships > 1000:
+            raise ValueError("Values too large")
+        att_value = att_ships * 3
+        def_value = def_ships * 3
+        immense, moderate, pyrrhic, failure, color = battle_odds(att_value, def_value)
+        description = f"{att_ships} ships vs\n{def_ships} ships"
+        embed = discord.Embed(title="Naval Battle Simulator", description=description, color=color)
+        embed.add_field(name=f"{immense}%", value="Immense Triumph", inline=False)
+        embed.add_field(name=f"{moderate}%", value="Moderate Success", inline=False)
+        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory", inline=False)
+        embed.add_field(name=f"{failure}%", value="Utter Failure", inline=False)
+        await ctx.send(embed=embed)
+
+    @naval.error
+    async def naval_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}naval <att ships> <def ships>`")
+
 def setup(bot):
     bot.add_cog(Calculations(bot))
