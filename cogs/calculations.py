@@ -143,5 +143,49 @@ class Calculations(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}naval <att ships> <def ships>`")
 
+
+    @commands.command(brief="City costs calculator")
+    async def citycosts(self, ctx, start_city, goal_city, project, percent_discount):
+        try:
+            start_city = int(start_city)
+            goal_city = int(goal_city)
+            percent_discount = int(percent_discount) / 100
+            project = project.lower()
+            if project not in ['0', 'cp', 'acp']:
+                raise ValueError("Error selecting project")
+        except:
+            raise ValueError("Error parsing inputs")
+        if project == 'cp':
+            absolute_discount = 50000000
+        elif project == 'acp':
+            absolute_discount = 150000000
+        else:
+            absolute_discount = 0
+        cost = 0
+        for current_city in range(start_city, goal_city):
+            next_city_cost = 50000*((current_city)-1)**3 + 150000*(current_city) + 75000
+            if project == 'cp' and current_city >= 11:
+                next_city_cost -= 50000000
+            elif project == 'acp':
+                if current_city >= 16:
+                    next_city_cost -= 150000000
+                elif current_city >= 11:
+                    next_city_cost -= 50000000
+            next_city_cost -= (next_city_cost * percent_discount)
+            cost += next_city_cost
+        cost = round(cost, 2)
+        embed = discord.Embed(title=f"${'{:,}'.format(cost)}", description=f"c{start_city} - c{goal_city}")
+        embed.add_field(name="Project Discount", value=f"${'{:,}'.format(absolute_discount)}")
+        embed.add_field(name="Percent Discount", value=f"{percent_discount*100}%")
+        await ctx.send(embed=embed)
+
+    @citycosts.error
+    async def citycosts_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}citycosts <start city> <goal city> <project> <percent discount>`")
+
+
+
+
 def setup(bot):
     bot.add_cog(Calculations(bot))
