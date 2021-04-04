@@ -56,4 +56,4 @@ print("Done!")
 
 
 
-bot.run(helpers.get_entry("token"))
+bot.run(helpers.get_data()['token'])

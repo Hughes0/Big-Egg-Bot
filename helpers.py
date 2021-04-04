@@ -4,14 +4,14 @@ import requests
 import sys
 
 
-def get_entry(key):
+def get_data():
     with open("keys.json") as f:
         data = json.loads(f.read())
-    return data[key]
+    return data
 
 
 def apikey(alliance_id=None, requests_needed=1, bank_access=False):
-    with open(filename) as f:
+    with open("keys.json") as f:
         apikeys = json.loads(f.read())['apikeys']
     if bank_access:
         min_alliance_position = 4
