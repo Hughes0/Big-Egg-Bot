@@ -29,6 +29,16 @@ def read_query(filename, query):
 
 
 def check(ctx, level):
+    # 10: bot admin
+    # 9: eclipse leaders
+    # 8: eclipse bankaccess
+    # 7: all highgov
+    # 6: all lowgov
+    # 5: 
+    # 4: 
+    # 3: 
+    # 2: all members
+    # 1: basic
     roles = [role.id for role in ctx.author.roles]
     query = f"SELECT role_id FROM permissions WHERE permission_level >= {level}"
     allowed_roles = [entry[0] for entry in read_query('databases/permissions.sqlite', query)]
@@ -98,9 +108,18 @@ class Settings(commands.Cog):
         execute_query('databases/permissions.sqlite', query)
         await ctx.send(f"Updated {role_id} permission level to {permission_level}")
 
+    @updatepermission.error
+    async def updatepermission_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}updatepermission <role_id> <permission_level>`")
+
     
     @commands.command()
     async def getpermission(self, ctx, role_id):
+        # level 6 command
+        if not check(ctx, 6):
+            raise Exception("Missing permissions")
+            return
         try:
             role_id = int(role_id)
         except:
@@ -118,6 +137,7 @@ class Settings(commands.Cog):
 
     @commands.command()
     async def testcheck(self, ctx, level):
+        # level 0
         try:
             level = int(level)
         except:

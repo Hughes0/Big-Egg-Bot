@@ -43,6 +43,10 @@ class Calculations(commands.Cog):
 
     @commands.command(brief="War ranges")
     async def range(self, ctx, score):
+        # level 1 command
+        if not check(ctx, 1):
+            raise Exception("Missing permissions")
+            return
         try:
             score = float(score.replace(',', ''))
             if score > 25000:
@@ -66,6 +70,10 @@ class Calculations(commands.Cog):
 
     @commands.command(brief="Ground battle simulator")
     async def ground(self, ctx, att_soldiers, att_tanks, def_soldiers, def_tanks):
+        # level 1 command
+        if not check(ctx, 1):
+            raise Exception("Missing permissions")
+            return
         try:
             att_soldiers = int(att_soldiers.replace(',', ''))
             att_tanks = int(att_tanks.replace(',', ''))
@@ -94,6 +102,10 @@ class Calculations(commands.Cog):
 
     @commands.command(brief="Airstrike simulator")
     async def air(self, ctx, att_planes, def_planes):
+        # level 1 command
+        if not check(ctx, 1):
+            raise Exception("Missing permissions")
+            return
         try:
             att_planes = int(att_planes.replace(',', ''))
             def_planes = int(def_planes.replace(',', ''))
@@ -120,6 +132,10 @@ class Calculations(commands.Cog):
 
     @commands.command(brief="Naval battle simulator")
     async def naval(self, ctx, att_ships, def_ships):
+        # level 1 command
+        if not check(ctx, 1):
+            raise Exception("Missing permissions")
+            return
         try:
             att_ships = int(att_ships.replace(',', ''))
             def_ships = int(def_ships.replace(',', ''))
@@ -146,6 +162,10 @@ class Calculations(commands.Cog):
 
     @commands.command(brief="City costs calculator")
     async def citycosts(self, ctx, start_city, goal_city, project, percent_discount):
+        # level 1 command
+        if not check(ctx, 1):
+            raise Exception("Missing permissions")
+            return
         try:
             start_city = int(start_city)
             goal_city = int(goal_city)
