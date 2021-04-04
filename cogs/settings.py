@@ -39,14 +39,6 @@ def check(ctx, level):
     
 
 
-def set_permission(role_id, permission_level):
-    query = f"""
-    INSERT INTO permissions (role_id, permission_level)
-    VALUES ({role_id}, {permission_level});
-    """
-    execute_query('databases/permissions.sqlite', query)
-
-    
 
 class Settings(commands.Cog):
 
@@ -56,6 +48,10 @@ class Settings(commands.Cog):
 
     @commands.command()
     async def setpermission(self, ctx, role_id, permission_level):
+        # level 10 command
+        if not check(ctx, 10):
+            raise Exception("Missing permissions")
+            return
         try:
             role_id = int(role_id)
             permission_level = int(permission_level)
@@ -63,13 +59,44 @@ class Settings(commands.Cog):
                 raise ValueError("Invalid input")
         except:
             raise ValueError("Invalid input")
-        set_permission(role_id, permission_level)
+        query = f"""
+        INSERT INTO permissions (role_id, permission_level)
+        VALUES ({role_id}, {permission_level});
+        """
+        try:
+            execute_query('databases/permissions.sqlite', query)
+        except Exception as e:
+            if "UNIQUE" in str(e):
+                await ctx.send("Use `updatepermission` instead")
+                return
         await ctx.send(f"Set {role_id} permission level to {permission_level}")
 
     @setpermission.error
     async def setpermission_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}setpermission <role_id> <permission_level>`")
+
+
+    @commands.command()
+    async def updatepermission(self, ctx, role_id, permission_level):
+        # level 10 command
+        if not check(ctx, 10):
+            raise Exception("Missing permissions")
+            return
+        try:
+            role_id = int(role_id)
+            permission_level = int(permission_level)
+            if permission_level > 10 or permission_level < 1:
+                raise ValueError("Invalid input")
+        except:
+            raise ValueError("Invalid input")
+        query = f"""
+        UPDATE permissions
+        SET permission_level = {permission_level}
+        WHERE role_id = {role_id};
+        """
+        execute_query('databases/permissions.sqlite', query)
+        await ctx.send(f"Updated {role_id} permission level to {permission_level}")
 
     
     @commands.command()
