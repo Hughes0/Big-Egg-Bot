@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import requests
 import sys
 sys.path.append("..")
 import helpers
@@ -54,9 +55,26 @@ class Alliance(commands.Cog):
         check_city_inputs(min_cities, max_cities)
         data = helpers.get_data()
         alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
-        apikey = helpers.apikey(alliance_id=alliance_id)['key']
+        apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)['key']
         url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
         nations = requests.get(url).json()['nations']
+        by_cities = lambda nation: nation['cities']
+        nations.sort(key=by_cities, reverse=True)
+        page = 1
+        for i in range(0, len(nations), 20):
+            embed = discord.Embed(title=f"Alliance Spies for {nations[0]['alliance']}", description=f"c{min_cities} - c{max_cities}")
+            for j in range(20):
+                if i+j > len(nations):
+                    break
+                nation = nations[i+j]
+                if nation['intagncy'] == "1":
+                    max_spies = 60
+                else:
+                    max_spies = 50
+                embed.add_field(name=f"{nation['nation']} c{nation['cities']}", value=f"{nation['spies']} / {max_spies}")
+            embed.set_footer(text=f"Page {page}")
+            await ctx.send(embed=embed)
+            page += 1
 
     @aaspies.error
     async def aaspies_error(self, ctx, error):
