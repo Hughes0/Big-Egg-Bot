@@ -1,5 +1,72 @@
-- Enable and disable certain features
-    - for each server, store which functions/modules are enabled
-        - store in SQLite
+- Functionality to enable and disable certain features
+    - for each server, store which functions/modules are enabled/disabled in database
         
-- add update apikey command to settings cog
+- Use task loop to cache data
+    - market prices
+    - alliance militarization
+    - alliance treaties
+    - use single task loop that runs hourly? or multiple that all run hourly but each have a separate function?
+        - so when bot needs to be restarted the task loops still run at the right times
+        - before each loop check if the previous hour's data was successully stored
+            - if so, continue as normal
+            - if not, perform the tasks that should have been run the previous hour
+
+- Optimize apikey retrieval and storage
+    - prioritize using keys without bank access first
+        - if bank access not required
+        - then check if there is a non bank access key with requests remaining
+        - if so, eliminate keys with bank access from the options for returned api key
+        - randomly choose from the remaining api keys (should be ones with calls but not bank access)
+    - store apikeys in database instead of keys.json
+
+- Application command
+    - "new"
+        - create new ticket
+            - category and role ids with access stored in database
+    - "archive"
+        - archive ticket
+            - option 1
+                - add ticket to archived category
+                - remove permissions for all except some, specified in database
+            - option 2
+                - download ticket as txt file
+                - make readable
+                - send txt file to an archive channel
+
+- War room command
+    - "warroom" <action>
+        - action=new
+            - arguments: target id, category name
+            - create new war room for specified target in specified category
+            - send information about nation in the channel
+            - pin nation link
+        - action=add
+            - arguments: users
+            - add specified users to current war room
+            - allow for multiple users
+            - if user is string, go by username
+            - elif user is int, go by id
+            - get selected user and add them to the channel
+        - action=remove
+            - no arguments
+            - deletes the current war channel
+
+- Log function
+    - not a command
+    - call in code
+        - when commands are used
+        - on task loop run?
+        - on database usage
+    - send to specified channel
+        - in bot testing probably
+
+- Warchest command
+    - by alliance
+    - store requirements in database
+        - columns:
+            - alliance id
+            - city tier
+            - bank_<rss> for each rss
+            - nation_<rss> for each rss
+    - create command to add/remove/edit/view warchest requirements in database
+        - different from normal warchest command
