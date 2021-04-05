@@ -1,52 +1,10 @@
 import discord
 from discord.ext import commands
-import sqlite3
-from sqlite3 import Error
-import datetime
+import sys
+sys.path.append("..")
+import helpers
 
 
-def execute_query(filename, query):
-    connection = sqlite3.connect(filename)
-    cursor = connection.cursor()
-    try:
-        cursor.execute(query)
-        connection.commit()
-        print(f"{datetime.datetime.now()}: Executed write query to {filename} successfully")
-    except Error as e:
-        raise Exception(e)
-
-
-def read_query(filename, query):
-    connection = sqlite3.connect(filename)
-    cursor = connection.cursor()
-    try:
-        cursor.execute(query)
-        result = cursor.fetchall()
-        print(f"{datetime.datetime.now()}: Read from database in {filename} successfully")
-        return result
-    except Error as e:
-        raise Exception(e)
-
-
-def check(ctx, level):
-    # 10: bot admin
-    # 9: eclipse leaders
-    # 8: eclipse bankaccess
-    # 7: all highgov
-    # 6: all lowgov
-    # 5: 
-    # 4: 
-    # 3: 
-    # 2: all members
-    # 1: basic
-    roles = [role.id for role in ctx.author.roles]
-    query = f"SELECT role_id FROM permissions WHERE permission_level >= {level}"
-    allowed_roles = [entry[0] for entry in read_query('databases/permissions.sqlite', query)]
-    for role in roles:
-        if role in allowed_roles:
-            return True
-    return False
-    
 
 
 
@@ -59,9 +17,7 @@ class Settings(commands.Cog):
     @commands.command()
     async def permissions(self, ctx, action, role_id, permission_level=0):
         # level 10 command
-        if not check(ctx, 10):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 10)
         try:
             role_id = int(role_id)
             permission_level = int(permission_level)
@@ -87,10 +43,10 @@ class Settings(commands.Cog):
                 VALUES ({role_id}, {permission_level});
             """
             try:
-                execute_query('databases/permissions.sqlite', query)
+                helpers.execute_query('databases/permissions.sqlite', query)
             except Exception as e:
                 if "UNIQUE" in str(e):
-                    await ctx.send("Use `updatepermission` instead")
+                    await ctx.send(f"Use `{self.bot.command_prefix}permissions update` instead")
                     return
             await ctx.send(f"Set {role_id} permission level to {permission_level}")
         elif action == "update":
@@ -99,18 +55,18 @@ class Settings(commands.Cog):
                 SET permission_level = {permission_level}
                 WHERE role_id = {role_id};
             """
-            execute_query('databases/permissions.sqlite', query)
+            helpers.execute_query('databases/permissions.sqlite', query)
             await ctx.send(f"Updated {role_id} permission level to {permission_level}")
         elif action == "remove":
             query = f"""
                 DELETE FROM permissions
                 WHERE role_id = {role_id};
             """
-            execute_query('databases/permissions.sqlite', query)
+            helpers.execute_query('databases/permissions.sqlite', query)
             await ctx.send(f"Removed permissions entry for {role_id}")
         elif action == "get":
             query = f"SELECT * FROM permissions WHERE role_id = {role_id}"
-            result = read_query('databases/permissions.sqlite', query)
+            result = helpers.read_query('databases/permissions.sqlite', query)
             try:
                 entry = result[0]
             except IndexError:

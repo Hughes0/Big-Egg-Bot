@@ -15,6 +15,18 @@ async def online(ctx):
     await ctx.send(f"Bot is online with latency {round(bot.latency, 3)}")
 
 
+@bot.command()
+async def code(ctx):
+    total_lines = 0
+    for root, dirs, files, in os.walk("."):
+        for filename in files:
+            if filename.endswith(".py"):
+                path = '/'.join([root, filename])
+                with open(path, 'r') as f:
+                    total_lines += len(f.read().split('\n'))
+    await ctx.send(f"{bot.user.name} has {total_lines} lines of code")
+
+
 @bot.event
 async def on_command_error(ctx, error):
     # argument errors are handled function-specifically
@@ -42,7 +54,7 @@ async def on_ready():
         permission_level INTEGER NOT NULL
     );
     """
-    settings.execute_query('databases/permissions.sqlite', create_permissions_table)
+    helpers.execute_query('databases/permissions.sqlite', create_permissions_table)
   
 
 
