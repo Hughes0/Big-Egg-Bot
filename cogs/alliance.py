@@ -6,19 +6,6 @@ sys.path.append("..")
 import helpers
 
 
-def check_city_inputs(min_cities, max_cities):
-    # function to make sure min and max city inputs are valid
-    try:
-        min_cities = int(max_cities)
-        max_cities = int(max_cities)
-    except:
-        raise ValueError("Invalid input")
-    if min_cities > max_cities:
-        raise ValueError("min_cities must be greater than max_cities")
-    if min_cities < 0 or max_cities < 0 or min_cities > 100 or max_cities > 100:
-        raise ValueError("Inputs out of range")
-
-
 
 class Alliance(commands.Cog):
 
@@ -49,7 +36,7 @@ class Alliance(commands.Cog):
     @commands.command()
     async def militarization(self, ctx, alliance_id, min_cities=0, max_cities=100):
         # check if inputs are valid
-        check_city_inputs(min_cities, max_cities)
+        helpers.check_city_inputs(min_cities, max_cities)
         # get alliance militarization
         # option for overview?
 
@@ -62,10 +49,11 @@ class Alliance(commands.Cog):
     @commands.command()
     async def aaspies(self, ctx, min_cities=0, max_cities=100):
         # check if inputs are valid
-        check_city_inputs(min_cities, max_cities)
+        helpers.check_city_inputs(min_cities, max_cities)
         # get alliance id from server id from keys.json
         data = helpers.get_data()
         alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+        # get alliance-members API data
         apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)['key']
         url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
         nations = requests.get(url).json()['nations']

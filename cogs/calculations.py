@@ -6,8 +6,10 @@ import random
 
 def battle_odds(att_value, def_value):
     immense, moderate, pyrrhic, failure = (0, 0, 0, 0)
+    # simulate 1000 battles and save their results
     for i in range(1000):
         att_rolls_won = 0
+        # simulate 3 rolls
         for j in range(3):
             att_roll = (random.randint(40, 100) / 100) * att_value
             def_roll = (random.randint(40, 100) / 100) * def_value
@@ -26,11 +28,11 @@ def battle_odds(att_value, def_value):
     pyrrhic = round(pyrrhic/10, 1)
     failure = round(failure/10, 1)
     if immense > 50:
-        color = 0x0fb500
+        color = 0x0fb500 # green
     elif failure > 50:
-        color = 0xff1100
+        color = 0xff1100 # red
     else: 
-        color = 0xf0d800
+        color = 0xf0d800 # yellow
     return immense, moderate, pyrrhic, failure, color
 
 
@@ -166,6 +168,7 @@ class Calculations(commands.Cog):
         if not check(ctx, 1):
             raise Exception("Missing permissions")
             return
+        # check if inputs are valid
         try:
             start_city = int(start_city)
             goal_city = int(goal_city)
@@ -175,22 +178,22 @@ class Calculations(commands.Cog):
                 raise ValueError("Error selecting project")
         except:
             raise ValueError("Error parsing inputs")
-        if project == 'cp':
-            absolute_discount = 50000000
-        elif project == 'acp':
-            absolute_discount = 150000000
-        else:
-            absolute_discount = 0
         cost = 0
+        # iterate through cities to purchase
         for current_city in range(start_city, goal_city):
+            # calculate cost of next city
             next_city_cost = 50000*((current_city)-1)**3 + 150000*(current_city) + 75000
+            # apply city planning discount when next city is at least 12
             if project == 'cp' and current_city >= 11:
                 next_city_cost -= 50000000
             elif project == 'acp':
+                # apply full advanced city planning discount when next city is at least 16
                 if current_city >= 16:
                     next_city_cost -= 150000000
+                # apply partial advanced city planning discount when next city is at least 11 but less than 16
                 elif current_city >= 11:
                     next_city_cost -= 50000000
+            # apply discounts to cost of next city
             next_city_cost -= (next_city_cost * percent_discount)
             cost += next_city_cost
         cost = round(cost, 2)

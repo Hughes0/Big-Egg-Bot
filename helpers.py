@@ -13,6 +13,7 @@ def get_data():
 
 
 def apikey(alliance_id=None, requests_needed=1, bank_access=False):
+    # get apikey from keys.json that matches the requested criteria
     with open("keys.json") as f:
         apikeys = json.loads(f.read())['apikeys']
     if bank_access:
@@ -30,6 +31,7 @@ def apikey(alliance_id=None, requests_needed=1, bank_access=False):
 
 
 def update_apikey(owner):
+    # update an apikey's info in keys.json
     with open("keys.json") as f:
         content = json.loads(f.read())
         apikeys = content['apikeys']
@@ -53,6 +55,7 @@ def update_apikey(owner):
 
 
 def execute_query(filename, query):
+    # execute a write query on a database
     connection = sqlite3.connect(filename)
     cursor = connection.cursor()
     try:
@@ -64,6 +67,7 @@ def execute_query(filename, query):
 
 
 def read_query(filename, query):
+    # execute a read query on a database
     connection = sqlite3.connect(filename)
     cursor = connection.cursor()
     try:
@@ -86,10 +90,25 @@ def check(ctx, level):
     # 3: 
     # 2: all members
     # 1: basic
+    # roles of user requesting to use command
     roles = [role.id for role in ctx.author.roles]
+    # ids of roles with allowed permissions
     query = f"SELECT role_id FROM permissions WHERE permission_level >= {level}"
     allowed_roles = [entry[0] for entry in read_query('databases/permissions.sqlite', query)]
     for role in roles:
         if role in allowed_roles:
             return True
     raise Exception("Missing permissions")
+
+
+def check_city_inputs(min_cities, max_cities):
+    # function to make sure min and max city inputs are valid
+    try:
+        min_cities = int(max_cities)
+        max_cities = int(max_cities)
+    except:
+        raise ValueError("Invalid input")
+    if min_cities > max_cities:
+        raise ValueError("min_cities must be greater than max_cities")
+    if min_cities < 0 or max_cities < 0 or min_cities > 100 or max_cities > 100:
+        raise ValueError("Inputs out of range")
