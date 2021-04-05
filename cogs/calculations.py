@@ -214,16 +214,18 @@ class Calculations(commands.Cog):
 
     @commands.command()
     async def spies(self, ctx, nation_id):
+        # level 2 command
+        helpers.check(ctx, 2)
+        # check if inputs are valid
         try:
             nation_id = int(nation_id)
         except:
             raise ValueError("Invalid input")
         await ctx.send("Calculating spies...")
+        # get nation API data
         nation_info = requests.get(f"http://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()['key']}").json()
-        if 'error' in nation_info.keys():
-            raise Exception(nation_info['error'])
-        if 'general_message' in nation_info.keys():
-            raise Exception(nation_info['general_message'])
+        # catch API errors
+        helpers.catch_api_error(data=nation_info, version=1)
         war_policy = nation_info['war_policy']
         spies = helpers.spy_calculator(nation_id,war_policy)
         embed = discord.Embed(title=f"Nation `id: {nation_id}` has `{spies}` spies",

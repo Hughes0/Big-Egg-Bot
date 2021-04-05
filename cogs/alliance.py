@@ -56,7 +56,10 @@ class Alliance(commands.Cog):
         # get alliance-members API data
         apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)['key']
         url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
-        nations = requests.get(url).json()['nations']
+        data = requests.get(url).json()
+        # catch API errors
+        helpers.catch_api_error(data=data, version=1)
+        nations = data['nations']
         by_cities = lambda nation: nation['cities']
         nations.sort(key=by_cities, reverse=True)
         # break nations array into embeds with max 20 nations each

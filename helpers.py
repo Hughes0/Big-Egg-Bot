@@ -128,3 +128,18 @@ def spy_calculator(nation_id,war_policy):
     if def_spies > 60: def_spies = 60
     elif def_spies <= 1: def_spies = 0
     return def_spies
+
+
+def catch_api_error(data, version):
+    if version == 1:
+        if 'error' in nation_info.keys():
+            raise Exception(nation_info['error'])
+        if 'general_message' in nation_info.keys():
+            raise Exception(nation_info['general_message'])
+    elif version == 2:
+        if not data['api_request']['success']:
+            raise Exception(data['api_request']['error_msg'])
+    elif version == 3:
+        pass
+    else:
+        raise ValueError("Invalid API version for catch_api_error()")
