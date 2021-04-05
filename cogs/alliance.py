@@ -7,6 +7,7 @@ import helpers
 
 
 def check_city_inputs(min_cities, max_cities):
+    # function to make sure min and max city inputs are valid
     try:
         min_cities = int(max_cities)
         max_cities = int(max_cities)
@@ -27,12 +28,17 @@ class Alliance(commands.Cog):
     
     @commands.command()
     async def warchest(self, ctx, cities):
+        # check if input is valid
         try:
             cities = int(cities)
         except:
             raise ValueError("Invalid input")
         if cities > 60 or cities < 1:
             raise ValueError("Inputs out of range")
+        # get alliance id from server id
+        # get wc reqs based on alliance
+        # return in embed
+        
         
     @warchest.error
     async def warchest_error(self, ctx, error):
@@ -42,7 +48,10 @@ class Alliance(commands.Cog):
     
     @commands.command()
     async def militarization(self, ctx, alliance_id, min_cities=0, max_cities=100):
+        # check if inputs are valid
         check_city_inputs(min_cities, max_cities)
+        # get alliance militarization
+        # option for overview?
 
     @militarization.error
     async def militarization_error(self, ctx, error):
@@ -52,7 +61,9 @@ class Alliance(commands.Cog):
 
     @commands.command()
     async def aaspies(self, ctx, min_cities=0, max_cities=100):
+        # check if inputs are valid
         check_city_inputs(min_cities, max_cities)
+        # get alliance id from server id from keys.json
         data = helpers.get_data()
         alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
         apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)['key']
@@ -60,6 +71,7 @@ class Alliance(commands.Cog):
         nations = requests.get(url).json()['nations']
         by_cities = lambda nation: nation['cities']
         nations.sort(key=by_cities, reverse=True)
+        # break nations array into embeds with max 20 nations each
         page = 1
         for i in range(0, len(nations), 20):
             embed = discord.Embed(title=f"Alliance Spies for {nations[0]['alliance']}", description=f"c{min_cities} - c{max_cities}")
