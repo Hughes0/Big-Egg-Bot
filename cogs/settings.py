@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
+import json
 import sys
-sys.path.append("..")
+import os
+sys.path.append('..')
 import helpers
-
 
 
 
@@ -94,6 +95,19 @@ class Settings(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}testcheck <level>`")
 
+
+    @commands.command()
+    async def updateapikey(self, ctx, owner="all"):
+        helpers.check(ctx, 10)
+        if owner == "all":
+            apikeys = helpers.get_data()['apikeys']
+            owners = apikeys.keys()
+            for owner in owners:
+                helpers.update_apikey(owner)
+            await ctx.send("Updated API keys")
+        else:
+            helpers.update_apikey(owner)
+            await ctx.send(f"Updated API key for {owner}")
 
 def setup(bot):
     bot.add_cog(Settings(bot))
