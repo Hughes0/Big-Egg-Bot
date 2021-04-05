@@ -108,6 +108,14 @@ class Settings(commands.Cog):
         else:
             helpers.update_apikey(owner)
             await ctx.send(f"Updated API key for {owner}")
+    
+    @updateapikey.error
+    async def updateapikey_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}updateapikey [owner]`")
+
+
+
 
 def setup(bot):
     bot.add_cog(Settings(bot))
