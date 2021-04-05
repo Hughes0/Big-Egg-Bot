@@ -14,26 +14,6 @@ class Alliance(commands.Cog):
 
     
     @commands.command()
-    async def warchest(self, ctx, cities):
-        # check if input is valid
-        try:
-            cities = int(cities)
-        except:
-            raise ValueError("Invalid input")
-        if cities > 60 or cities < 1:
-            raise ValueError("Inputs out of range")
-        # get alliance id from server id
-        # get wc reqs based on alliance
-        # return in embed
-        
-        
-    @warchest.error
-    async def warchest_error(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warchest <cities>`")
-
-    
-    @commands.command()
     async def militarization(self, ctx, alliance_id, min_cities=0, max_cities=100):
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)

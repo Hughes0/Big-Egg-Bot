@@ -239,6 +239,28 @@ class Calculations(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}spies <nation_id>`")
 
 
+    @commands.command()
+    async def warchest(self, ctx, cities):
+        # check if input is valid
+        try:
+            cities = int(cities)
+        except:
+            raise ValueError("Invalid input")
+        if cities > 60 or cities < 1:
+            raise ValueError("Inputs out of range")
+        data = helpers.get_data()
+        # get alliance id from server id
+        data['discord_to_alliance'][str(ctx.guild.id)]
+        # get wc reqs based on alliance
+        # return in embed
+        
+        
+    @warchest.error
+    async def warchest_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warchest <cities>`")
+
+
 
 def setup(bot):
     bot.add_cog(Calculations(bot))
