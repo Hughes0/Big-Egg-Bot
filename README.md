@@ -1,7 +1,3 @@
 Discord bot for Politics and War
 
-When running, store key data in keys.json
-ex:
-{
-  "token": "TOKEN"
-}
+When running, store simple key data in keys.json
