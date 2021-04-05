@@ -33,10 +33,12 @@ def update_apikey(owner):
     with open("keys.json") as f:
         content = json.loads(f.read())
         apikeys = content['apikeys']
-    entry = apikeys[owner]
-    url = f"https://politicsandwar.com/api/v2/nations/{entry['key']}//&alliance_id=0&min_score=3000"
+    try:
+        entry = apikeys[owner]
+    except:
+        raise Exception(f"API key for {owner} not found")
+    url = f"https://politicsandwar.com/api/v2/nations/{entry['key']}/&alliance_id=0&min_score=3000"
     data = requests.get(url).json()['api_request']['api_key_details']
-    print(data)
     new_entry = {
         "key": entry['key'],
         "alliance_id": data['alliance_id'],
@@ -44,7 +46,6 @@ def update_apikey(owner):
         "requests_remaining": data['daily_requests_remaining']
     }
     content["apikeys"][owner] = new_entry
-    print(content)
     with open("keys.json", 'w') as f:
         json.dump(content, f, indent=4)
 
@@ -91,4 +92,4 @@ def check(ctx, level):
     for role in roles:
         if role in allowed_roles:
             return True
-    raise Exception("Check failed")
+    raise Exception("Missing permissions")
