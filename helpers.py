@@ -112,3 +112,19 @@ def check_city_inputs(min_cities, max_cities):
         raise ValueError("min_cities must be greater than max_cities")
     if min_cities < 0 or max_cities < 0 or min_cities > 100 or max_cities > 100:
         raise ValueError("Inputs out of range")
+
+
+def spy_calculator(nation_id,war_policy):
+    safety_level = 2
+    att_spies = 60
+    while att_spies > 0:
+        odds = requests.get(f"https://politicsandwar.com/war/espionage_get_odds.php?id1=1&id2={nation_id}&id3=6&id4={safety_level}&id5={att_spies}").text.split(" ")[0].lower()
+        if odds == "lower": break
+        att_spies -= 1
+    if war_policy.lower() == "tactician": odds = 43.5
+    elif war_policy.lower() == "arcane": odds = 55.5
+    else: odds = 50
+    def_spies = int(round((((100*(att_spies+1))/((odds*1.5)-(25*safety_level)))-1)/3,0))
+    if def_spies > 60: def_spies = 60
+    elif def_spies <= 1: def_spies = 0
+    return def_spies

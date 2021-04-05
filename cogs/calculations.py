@@ -2,6 +2,10 @@ import discord
 from discord.ext import commands
 import math
 import random
+import requests
+import sys
+sys.path.append('..')
+import helpers
 
 
 def battle_odds(att_value, def_value):
@@ -207,6 +211,30 @@ class Calculations(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}citycosts <start city> <goal city> <project> <percent discount>`")
 
+
+    @commands.command()
+    async def spies(self, ctx, nation_id):
+        try:
+            nation_id = int(nation_id)
+        except:
+            raise ValueError("Invalid input")
+        await ctx.send("Calculating spies...")
+        nation_info = requests.get(f"http://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()['key']}").json()
+        if 'error' in nation_info.keys():
+            raise Exception(nation_info['error'])
+        if 'general_message' in nation_info.keys():
+            raise Exception(nation_info['general_message'])
+        war_policy = nation_info['war_policy']
+        spies = helpers.spy_calculator(nation_id,war_policy)
+        embed = discord.Embed(title=f"Nation `id: {nation_id}` has `{spies}` spies",
+                            description=f"[politicsandwar.com/nation/id={nation_id}](https://politicsandwar.com/nation/id={nation_id})")
+        embed.set_footer(text=f"War Policy: {war_policy}")
+        await ctx.send(embed=embed)
+
+    @spies.error
+    async def spies_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}spies <nation_id>`")
 
 
 
