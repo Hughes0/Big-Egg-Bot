@@ -11,13 +11,6 @@
             - if so, continue as normal
             - if not, perform the tasks that should have been run the previous hour
 
-- Optimize apikey retrieval and storage
-    - prioritize using keys without bank access first
-        - if bank access not required
-        - then check if there is a non bank access key with requests remaining
-        - if so, eliminate keys with bank access from the options for returned api key
-        - randomly choose from the remaining api keys (should be ones with calls but not bank access)
-
 - Application command
     - "new"
         - create new ticket
