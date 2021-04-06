@@ -55,6 +55,17 @@ async def on_ready():
     );
     """
     helpers.execute_query('databases/permissions.sqlite', create_permissions_table)
+    # create keys table
+    create_keys_table = """
+    CREATE TABLE IF NOT EXISTS keys (
+        key TEXT PRIMARY KEY,
+        owner TEXT,
+        alliance_id INTEGER,
+        alliance_position INTEGER,
+        requests_remaining INTEGER
+    );
+    """
+    helpers.execute_query('databases/keys.sqlite', create_keys_table)
   
 
 
