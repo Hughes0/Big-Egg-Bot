@@ -17,7 +17,6 @@
         - then check if there is a non bank access key with requests remaining
         - if so, eliminate keys with bank access from the options for returned api key
         - randomly choose from the remaining api keys (should be ones with calls but not bank access)
-    - store apikeys in database instead of keys.json
 
 - Application command
     - "new"
