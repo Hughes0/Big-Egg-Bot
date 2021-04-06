@@ -50,6 +50,13 @@ def apikey(alliance_id=None, requests_needed=1, bank_access=False):
     if bank_access:
         query += f" AND alliance_position >= 4"
     results = read_query('databases/keys.sqlite', query)
+    if not bank_access:
+        non_bank_keys = []
+        for entry in results:
+            if entry[3] < 4 and entry[4] >= requests_needed:
+                non_bank_keys.append(entry)
+        if non_bank_keys:
+            return random.choice(non_bank_keys)[0]
     return random.choice(results)[0]
 
 
