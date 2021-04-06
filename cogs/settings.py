@@ -192,7 +192,10 @@ class Settings(commands.Cog):
         else:
             raise ValueError("Invalid action, options are `set`, `get`, `update`, and `remove`")
 
-
+    @apikey.error
+    async def apikey_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}apikey <action>`")
 
 
 def setup(bot):
