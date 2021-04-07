@@ -192,14 +192,64 @@ class Calculations(commands.Cog):
             cost += next_city_cost
         cost = round(cost, 2)
         embed = discord.Embed(title=f"${'{:,}'.format(cost)}", description=f"c{start_city} - c{goal_city}")
-        embed.add_field(name="Project", value=project.upper())
-        embed.add_field(name="Percent Discount", value=f"{percent_discount*100}%")
+        embed.add_field(name=project.upper(), value="Project", inline=False)
+        embed.add_field(name=f"{percent_discount*100}%", value="Percent Discount", inline=False)
         await ctx.send(embed=embed)
 
     @citycosts.error
     async def citycosts_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}citycosts <start city> <goal city> <project> <percent discount>`")
+
+
+    @commands.command()
+    async def infracosts(self, ctx, start_infra, goal_infra, cities, percent_discount):
+        # level 1 command
+        helpers.check(ctx, 1)
+        # check if inputs are valid
+        try:
+            start_infra = int(start_infra)
+            goal_infra = int(goal_infra)
+            cities = int(cities)
+            percent_discount = int(percent_discount)
+        except:
+            raise ValueError("Invalid input")
+        if (start_infra > goal_infra or start_infra > 10000 or 
+            goal_infra > 10000 or start_infra < 0 or goal_infra < 0 or
+            cities > 60 or cities < 0 or 
+            percent_discount < 0 or percent_discount > 100):
+            raise ValueError("Values out of range")
+        percent_discount = percent_discount / 100
+        total_cost = 0
+        # get infra amount to buy
+        to_buy = goal_infra - start_infra
+        # split amount to buy into chunks of 100 (price changes every 100)
+        chunks = math.floor(to_buy / 100)
+        # calculate leftover to buy that does not fit into the chunks
+        leftover = to_buy - chunks * 100
+        # iterate through chunks
+        count = 0
+        while count < chunks:
+            # get the starting infra amount for current chunk
+            chunk_starting_infra = start_infra + (count * 100)
+            # calculate current of that chunk and add it to total
+            cost = 100*((((chunk_starting_infra-10)**2.2) / 710) + 300)
+            total_cost += cost
+            count += 1
+        # calculate cost of leftover to buy and add to total cost
+        if leftover > 0:
+            cost = leftover*(((((start_infra+(chunks*100))-10)**2.2) / 710) + 300)
+            total_cost += cost
+        # apply discount and multiply by selected number of cities
+        total_cost *= cities
+        total_cost -= (total_cost * percent_discount)
+        total_cost = round(total_cost, 1)
+        # create embed
+        embed = discord.Embed(title=f"${'{:,}'.format(total_cost)}", description=f"{start_infra} - {goal_infra} infra")
+        embed.add_field(name=cities, value="Cities", inline=False)
+        embed.add_field(name=f"{percent_discount*100}%", value="Percent Discount", inline=False)
+        await ctx.send(embed=embed)
+
 
 
     @commands.command()
