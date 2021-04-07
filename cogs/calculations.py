@@ -50,9 +50,7 @@ class Calculations(commands.Cog):
     @commands.command(brief="War ranges")
     async def range(self, ctx, score):
         # level 1 command
-        if not check(ctx, 1):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 1)
         try:
             score = float(score.replace(',', ''))
             if score > 25000:
@@ -77,9 +75,7 @@ class Calculations(commands.Cog):
     @commands.command(brief="Ground battle simulator")
     async def ground(self, ctx, att_soldiers, att_tanks, def_soldiers, def_tanks):
         # level 1 command
-        if not check(ctx, 1):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 1)
         try:
             att_soldiers = int(att_soldiers.replace(',', ''))
             att_tanks = int(att_tanks.replace(',', ''))
@@ -109,9 +105,7 @@ class Calculations(commands.Cog):
     @commands.command(brief="Airstrike simulator")
     async def air(self, ctx, att_planes, def_planes):
         # level 1 command
-        if not check(ctx, 1):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 1)
         try:
             att_planes = int(att_planes.replace(',', ''))
             def_planes = int(def_planes.replace(',', ''))
@@ -139,9 +133,7 @@ class Calculations(commands.Cog):
     @commands.command(brief="Naval battle simulator")
     async def naval(self, ctx, att_ships, def_ships):
         # level 1 command
-        if not check(ctx, 1):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 1)
         try:
             att_ships = int(att_ships.replace(',', ''))
             def_ships = int(def_ships.replace(',', ''))
@@ -169,9 +161,7 @@ class Calculations(commands.Cog):
     @commands.command(brief="City costs calculator")
     async def citycosts(self, ctx, start_city, goal_city, project, percent_discount):
         # level 1 command
-        if not check(ctx, 1):
-            raise Exception("Missing permissions")
-            return
+        helpers.check(ctx, 1)
         # check if inputs are valid
         try:
             start_city = int(start_city)
@@ -202,7 +192,7 @@ class Calculations(commands.Cog):
             cost += next_city_cost
         cost = round(cost, 2)
         embed = discord.Embed(title=f"${'{:,}'.format(cost)}", description=f"c{start_city} - c{goal_city}")
-        embed.add_field(name="Project Discount", value=f"${'{:,}'.format(absolute_discount)}")
+        embed.add_field(name="Project", value=project.upper())
         embed.add_field(name="Percent Discount", value=f"{percent_discount*100}%")
         await ctx.send(embed=embed)
 

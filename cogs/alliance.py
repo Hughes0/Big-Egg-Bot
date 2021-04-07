@@ -34,12 +34,13 @@ class Alliance(commands.Cog):
         data = helpers.get_data()
         alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
         # get alliance-members API data
-        apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)['key']
+        apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)
         url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
         data = requests.get(url).json()
         # catch API errors
         helpers.catch_api_error(data=data, version=1)
         nations = data['nations']
+        nations = [nation for nation in nations if nation['cities'] >= min_cities and nation['cities'] <= max_cities]
         by_cities = lambda nation: nation['cities']
         nations.sort(key=by_cities, reverse=True)
         # break nations array into embeds with max 20 nations each
@@ -47,7 +48,7 @@ class Alliance(commands.Cog):
         for i in range(0, len(nations), 20):
             embed = discord.Embed(title=f"Alliance Spies for {nations[0]['alliance']}", description=f"c{min_cities} - c{max_cities}")
             for j in range(20):
-                if i+j > len(nations):
+                if i+j >= len(nations):
                     break
                 nation = nations[i+j]
                 if nation['intagncy'] == "1":
