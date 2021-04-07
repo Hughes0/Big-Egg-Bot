@@ -101,23 +101,33 @@ async def on_ready():
     await bot.change_presence(activity=game)
     # create permissions table
     create_permissions_table = """
-    CREATE TABLE IF NOT EXISTS permissions (
-        role_id INTEGER PRIMARY KEY,
-        permission_level INTEGER NOT NULL
-    );
+        CREATE TABLE IF NOT EXISTS permissions (
+            role_id INTEGER PRIMARY KEY,
+            permission_level INTEGER NOT NULL
+        );
     """
     helpers.execute_query('databases/permissions.sqlite', create_permissions_table)
     # create keys table
     create_keys_table = """
-    CREATE TABLE IF NOT EXISTS keys (
-        key TEXT PRIMARY KEY,
-        owner TEXT,
-        alliance_id INTEGER,
-        alliance_position INTEGER,
-        requests_remaining INTEGER
-    );
+        CREATE TABLE IF NOT EXISTS keys (
+            key TEXT PRIMARY KEY,
+            owner TEXT,
+            alliance_id INTEGER,
+            alliance_position INTEGER,
+            requests_remaining INTEGER
+        );
     """
     helpers.execute_query('databases/keys.sqlite', create_keys_table)
+    # create projects table
+    create_projects_table = """
+        CREATE TABLE IF NOT EXISTS projects (
+            name TEXT PRIMARY KEY,
+            description TEXT,
+            image_url TEXT,
+            cost TEXT
+        );
+    """
+    helpers.execute_query('databases/game_data.sqlite', create_projects_table)
   
 
 
