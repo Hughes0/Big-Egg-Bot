@@ -110,10 +110,10 @@ class Settings(commands.Cog):
                 raise ValueError(f"Missing arguments, correct syntax is `{self.bot.command_prefix}apikey set <owner> <key>`")
             owner = owner.lower()
             query = """
-            INSERT INTO keys
-                (key, owner, alliance_id, alliance_position, requests_remaining)
-            VALUES
-                (?, ?, ?, ?, ?);
+                INSERT INTO keys
+                    (key, owner, alliance_id, alliance_position, requests_remaining)
+                VALUES
+                    (?, ?, ?, ?, ?);
             """
             url = f"https://politicsandwar.com/api/v2/nations/{key}/&alliance_id=7450&alliance_position=2,3,4,5&v_mode=false"
             data = requests.get(url).json()
@@ -196,6 +196,31 @@ class Settings(commands.Cog):
     async def apikey_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}apikey <action>`")
+
+    
+    @commands.command()
+    async def addproject(self, ctx, name, description, image_url, *cost):
+        try:
+            cost = helpers.get_arguments(cost)
+        except:
+            raise ValueError("Invalid cost input")
+        query = """
+            INSERT INTO projects
+                (name, description, image_url, cost)
+            VALUES
+                (?, ?, ?, ?);
+        """
+        arguments = (name, description, image_url, json.dumps(cost))
+        helpers.execute_query('databases/game_data.sqlite', query, arguments)
+        await ctx.send("Added project data to database")
+
+    @addproject.error
+    async def addproject_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}addproject <name> <description> <image_url> <*cost>`")
+        
+
+
 
 
 def setup(bot):
