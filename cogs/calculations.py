@@ -57,13 +57,13 @@ class Calculations(commands.Cog):
                 raise ValueError("Invalid input")
         except:
             raise ValueError("Invalid input")
-        min_off, max_off = round(score*0.75, 2), round(score*1.75, 2)
-        min_def, max_def = round(score/1.75, 2), round(score/0.75, 2)
-        min_spy, max_spy = round(score*0.4, 2), round(score*2.5, 2)
-        embed = discord.Embed(title=f"{score} ns", description="War Ranges")
-        embed.add_field(name="Offensive War Range", value=f"{min_off} - {max_off}", inline=False)
-        embed.add_field(name="Defensive War Range", value=f"{min_def} - {max_def}", inline=False)
-        embed.add_field(name="Spy Range", value=f"{min_spy} - {max_spy}", inline=False)
+        min_off, max_off = int(round(score*0.75, 0)), int(round(score*1.75, 0))
+        min_def, max_def = int(round(score/1.75, 0)), int(round(score/0.75, 0))
+        min_spy, max_spy = int(round(score*0.4, 0)), int(round(score*2.5, 0))
+        embed = discord.Embed(title=f"{score} ns", description="Score Ranges")
+        embed.add_field(name=f"{min_off} - {max_off}", value="Offensive War Range", inline=False)
+        embed.add_field(name=f"{min_def} - {max_def}", value="Defensive War Range", inline=False)
+        embed.add_field(name=f"{min_spy} - {max_spy}", value="Spy Range", inline=False)
         await ctx.send(embed=embed)
 
     @range.error
