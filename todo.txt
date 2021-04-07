@@ -10,6 +10,7 @@
         - before each loop check if the previous hour's data was successully stored
             - if so, continue as normal
             - if not, perform the tasks that should have been run the previous hour
+    - **each hourly task loop, check time since each task has been done last, if that time is greater than a specified amount, run the task
 
 - Application command
     - "new"
