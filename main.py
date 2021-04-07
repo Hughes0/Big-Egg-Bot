@@ -9,6 +9,58 @@ bot = commands.Bot(command_prefix = "$")
 
 
 
+def get_cogs():
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            yield f"cogs.{filename[:-3]}"
+
+
+def edit_cog(func, cog, action):
+    try:
+        func(cog)
+    except Exception as e:
+        return e
+    else:
+        return f"{action.capitalize()}ed {cog}"
+
+
+@bot.command()
+async def load(ctx, cog=None):
+    # level 10 command
+    helpers.check(ctx, 10)
+    # loads cogs
+    if not cog:
+        for cog in get_cogs():
+            await ctx.send(edit_cog(bot.load_extension, cog, "load"))
+    else:
+        await ctx.send(edit_cog(bot.load_extension, cog, "load"))
+
+
+@bot.command()
+async def unload(ctx, cog=None):
+    # level 10 command
+    helpers.check(ctx, 10)
+    # unloads cogs
+    if not cog:
+        for cog in get_cogs():
+            await ctx.send(edit_cog(bot.unload_extension, cog, "unload"))
+    else:
+        await ctx.send(edit_cog(bot.unload_extension, cog, "unload"))
+
+
+@bot.command()
+async def reload(ctx, cog=None):
+    # level 10 command
+    helpers.check(ctx, 10)
+    # reloads cogs
+    if not cog:
+        for cog in get_cogs():
+            await ctx.send(edit_cog(bot.reload_extension, cog, "reload"))
+    else:
+        await ctx.send(edit_cog(bot.reload_extension, cog, "reload"))
+
+
+
 @bot.command()
 async def online(ctx):
     # command to test if bot is running
