@@ -108,3 +108,11 @@ def catch_api_error(data, version):
         pass
     else:
         raise ValueError("Invalid API version for catch_api_error()")
+
+
+def get_arguments(args):
+    parsed = {}
+    for arg in args:
+        arg = arg.split("=")
+        parsed[arg[0]] = arg[1]
+    return parsed
