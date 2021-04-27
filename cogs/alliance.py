@@ -66,6 +66,34 @@ class Alliance(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}aaspies <min_cities> <max_cities>`")
 
 
+    @commands.command()
+    async def activity(self, ctx, alliance_id):
+        alliance_id = int(alliance_id)
+        url = f"https://politicsandwar.com/api/nations/?alliance_id={alliance_id}&key={helpers.apikey()}"
+        response = requests.get(url).json()
+        nations = response['nations']
+        if not nations or alliance_id == 0:
+            raise ValueError("No nations found")
+        if not response['success']:
+            raise ValueError("An error occurred fetching data from the API")
+        activity = [nation['minutessinceactive'] for nation in nations if nation['vacmode'] == 0]
+        notable_times = [ # inclusive
+            (0, 0, "currently online"),
+            (1, 60, "last hour"),
+            (61, 360, "last 12 hours"),
+            (361, 1440, "last day"),
+            (1441, 4320, "last 3 days")
+        ]
+        embed = discord.Embed(title=f"Activity Distribution of {nations[0]['alliance']}")
+        for (minimum, maximum, label) in notable_times:
+            embed.add_field(name=len([n for n in activity if maximum >= n >= minimum]), value=label.capitalize(), inline=False)
+        await ctx.send(embed=embed)
+
+    @activity.error
+    async def activity_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}activity <alliance id>`")
+
 
 def setup(bot):
     bot.add_cog(Alliance(bot))
