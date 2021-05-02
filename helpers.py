@@ -97,9 +97,10 @@ def check_city_inputs(min_cities, max_cities):
 
 def catch_api_error(data, version):
     if version == 1:
-        if 'error' in data.keys():
+        keys = [key for key in data]
+        if 'error' in keys:
             raise Exception(data['error'])
-        if 'general_message' in data.keys():
+        if 'general_message' in keys:
             raise Exception(data['general_message'])
     elif version == 2:
         if not data['api_request']['success']:
