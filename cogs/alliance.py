@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import requests
+import datetime
+import random
 import sys
 sys.path.append("..")
 import helpers
@@ -74,8 +76,8 @@ class Alliance(commands.Cog):
         nations = response['nations']
         if not nations or alliance_id == 0:
             raise ValueError("No nations found")
-        if not response['success']:
-            raise ValueError("An error occurred fetching data from the API")
+        # catch API errors
+        helpers.catch_api_error(data=response, version=1)
         activity = [nation['minutessinceactive'] for nation in nations if nation['vacmode'] == 0 and nation['allianceposition'] > 1]
         notable_times = [ # inclusive
             (0, 0, "currently online"),
@@ -95,6 +97,58 @@ class Alliance(commands.Cog):
     async def activity_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}activity <alliance id>`")
+
+
+    @commands.command()
+    async def counters(self, ctx, att_nation_id, def_alliance_id=None):
+        # level 6 command
+        helpers.check(ctx, 6)
+        if not def_alliance_id:
+            # get alliance id from server id from keys.json
+            data = helpers.get_data()
+            def_alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+            await ctx.send(f"Defaulting to def_alliance_id of `{def_alliance_id}`")
+        try:
+            att_nation_id = int(att_nation_id)
+            def_alliance_id = int(def_alliance_id)
+        except:
+            raise ValueError("Invalid input")
+        await ctx.send("Calculating counters...")
+        # get nation data
+        nation = requests.get(f"https://politicsandwar.com/api/nation/id={att_nation_id}/&key={helpers.apikey()}").json()
+        helpers.catch_api_error(data=nation, version=1)
+        score = float(nation['score'])
+        min_def = score / 1.75
+        max_def = score / 0.75
+        # get alliance members who are in range
+        url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={def_alliance_id}&alliance_position=2,3,4,5&v_mode=false"
+        alliance_response = requests.get(url).json()
+        helpers.catch_api_error(data=alliance_response, version=2)
+        members = [member for member in alliance_response['data'] if 
+                        member['score'] >= min_def and 
+                        member['score'] <= max_def
+                        and (datetime.datetime.now() - datetime.datetime.strptime(member['last_active'], "%Y-%m-%d %H:%M:%S")).days == 0]
+        # sorting order soldiers -> cities -> tanks -> air
+        # (order of importance is ascending)
+        await ctx.send(f"`{len(members)}`` eligible nations found, sorting...")
+        most_soldiers = lambda nation: nation['soldiers']
+        members.sort(key=most_soldiers, reverse=True)
+        most_cities = lambda nation: nation['cities']
+        members.sort(key=most_cities, reverse=True)
+        most_tanks = lambda nation: nation['tanks']
+        members.sort(key=most_tanks, reverse=True)
+        most_air = lambda nation: nation['aircraft']
+        members.sort(key=most_air, reverse=True)
+        await ctx.send("Returning top 3 nations...")
+        for i in range(3):
+            nation = members[i]
+            embed = discord.Embed(title=nation['nation'])
+            await ctx.send(embed=embed)
+        
+    @counters.error
+    async def counters_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}counters <att_nation_id> <def_alliance_id>`")
 
 
 def setup(bot):
