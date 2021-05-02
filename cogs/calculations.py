@@ -8,7 +8,7 @@ sys.path.append('..')
 import helpers
 
 
-def battle_odds(att_value, def_value):
+def battle_odds(att_value, def_value):    
     immense, moderate, pyrrhic, failure = (0, 0, 0, 0)
     # simulate 1000 battles and save their results
     for i in range(1000):
