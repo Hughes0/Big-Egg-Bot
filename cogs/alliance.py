@@ -76,7 +76,7 @@ class Alliance(commands.Cog):
             raise ValueError("No nations found")
         if not response['success']:
             raise ValueError("An error occurred fetching data from the API")
-        activity = [nation['minutessinceactive'] for nation in nations if nation['vacmode'] == 0]
+        activity = [nation['minutessinceactive'] for nation in nations if nation['vacmode'] == 0 and nation['allianceposition'] > 1]
         notable_times = [ # inclusive
             (0, 0, "currently online"),
             (1, 60, "last hour"),
@@ -84,9 +84,11 @@ class Alliance(commands.Cog):
             (361, 1440, "last day"),
             (1441, 4320, "last 3 days")
         ]
-        embed = discord.Embed(title=f"Activity Distribution of {nations[0]['alliance']}")
+        embed = discord.Embed(title=f"Activity Distribution of {nations[0]['alliance']}", description=f"{len(activity)} total members")
         for (minimum, maximum, label) in notable_times:
-            embed.add_field(name=len([n for n in activity if maximum >= n >= minimum]), value=label.capitalize(), inline=False)
+            raw = len([n for n in activity if maximum >= n >= minimum])
+            percent = int(round(100*(raw/len(activity)), 0))
+            embed.add_field(name=f"{raw} ({percent}%)", value=label.capitalize(), inline=False)
         await ctx.send(embed=embed)
 
     @activity.error
