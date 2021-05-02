@@ -19,7 +19,7 @@ class Settings(commands.Cog):
     @commands.command()
     async def permissions(self, ctx, action, role_id, permission_level=0):
         # level 10 command
-        # helpers.check(ctx, 10)
+        helpers.check(ctx, 10)
         try:
             role_id = int(role_id)
             permission_level = int(permission_level)
@@ -91,7 +91,7 @@ class Settings(commands.Cog):
             level = int(level)
         except:
             raise ValueError("Invalid input")
-        await ctx.send(check(ctx, level))
+        await ctx.send(helpers.check(ctx, level))
 
     @testcheck.error
     async def testcheck_error(self, ctx, error):
