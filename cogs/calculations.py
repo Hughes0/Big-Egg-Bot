@@ -263,7 +263,7 @@ class Calculations(commands.Cog):
             raise ValueError("Invalid input")
         await ctx.send("Calculating spies...")
         # get nation API data
-        nation_info = requests.get(f"http://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()['key']}").json()
+        nation_info = requests.get(f"http://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()}").json()
         # catch API errors
         helpers.catch_api_error(data=nation_info, version=1)
         war_policy = nation_info['war_policy']
