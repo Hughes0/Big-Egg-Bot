@@ -63,3 +63,8 @@
             - nation_<rss> for each rss
     - create command to add/remove/edit/view warchest requirements in database
         - different from normal warchest command
+        
+- Embassy command
+    - create role
+    - create room
+        - add perms for high gov + the role + any others specified
