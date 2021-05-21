@@ -2,7 +2,6 @@ import helpers
 import os
 import discord
 from discord.ext import commands
-from cogs import settings
 
 
 bot = commands.Bot(command_prefix = "$")
@@ -10,12 +9,14 @@ bot = commands.Bot(command_prefix = "$")
 
 
 def get_cogs():
+    # list all cogs
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             yield f"cogs.{filename[:-3]}"
 
 
 def edit_cog(func, cog, action):
+    # perform the selected function on the selected cog
     try:
         func(cog)
     except Exception as e:
@@ -69,6 +70,7 @@ async def online(ctx):
 
 @bot.command()
 async def code(ctx):
+    # counts lines of python code in the bot
     total_lines = 0
     for root, dirs, files, in os.walk("."):
         for filename in files:
@@ -84,10 +86,13 @@ async def on_command_error(ctx, error):
     # argument errors are handled function-specifically
     if isinstance(error, commands.MissingRequiredArgument):
         pass
+    # missing permissions
     elif isinstance(error,commands.CheckFailure):
         await ctx.send("Check failed")
+    # command does not exist
     elif isinstance(error,commands.CommandNotFound):
         await ctx.send("Command not found")
+    # any others
     else:
         await ctx.send(error)
 
