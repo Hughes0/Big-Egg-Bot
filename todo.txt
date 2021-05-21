@@ -68,3 +68,7 @@
     - create role
     - create room
         - add perms for high gov + the role + any others specified
+
+- Alliance members policies command
+    - display war and domestic policy for each member in selected city range
+    - see if there is a way to get timer for policy change?
