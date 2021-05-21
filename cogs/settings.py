@@ -35,19 +35,23 @@ class Settings(commands.Cog):
     async def permissions(self, ctx):
         # level 10 command
         helpers.check(ctx, 10)
+        # case no action selected
         if ctx.invoked_subcommand is None:
             raise Exception("Invalid action")
 
     @permissions.command(pass_context=True)
     async def get(self, ctx, role_id):
+        # get the permissions of a role by id (or all roles)
         if role_id != "all":
             await ctx.send(f"Role name: {get_role_name(self.bot, role_id)}")
         if role_id == "all":
+            # send all permissions
             query = "SELECT * FROM permissions"
             results = helpers.read_query('databases/permissions.sqlite', query)
             for result in results:
                 await ctx.send(result)
         else:
+            # send permissions for selected role
             query = f"SELECT * FROM permissions WHERE role_id = {role_id}"
             result = helpers.read_query('databases/permissions.sqlite', query)
             try:
@@ -59,6 +63,7 @@ class Settings(commands.Cog):
     
     @permissions.command(pass_context=True)
     async def set(self, ctx, role_id, permission_level):
+        # option to create new permission entry (not update existing)
         await ctx.send(f"Role name: {get_role_name(self.bot, role_id)}")
         if not is_valid_permission_level(permission_level):
             raise Exception("Invalid permission level")
@@ -76,6 +81,7 @@ class Settings(commands.Cog):
 
     @permissions.command(pass_context=True)
     async def update(self, ctx, role_id, permission_level):
+        # update an existing permission entry for a selected role
         await ctx.send(f"Role name: {get_role_name(self.bot, role_id)}")
         if not is_valid_permission_level(permission_level):
             raise Exception("Invalid permission level")
@@ -89,6 +95,7 @@ class Settings(commands.Cog):
 
     @permissions.command(pass_context=True)
     async def remove(self, ctx, role_id):
+        # remove a role's permission entry
         await ctx.send(f"Role name: {get_role_name(self.bot, role_id)}")
         query = f"""
             DELETE FROM permissions
