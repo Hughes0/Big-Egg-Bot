@@ -30,6 +30,8 @@ class Alliance(commands.Cog):
 
     @commands.command()
     async def aaspies(self, ctx, min_cities=0, max_cities=100):
+        # level 6 command
+        helpers.check(ctx, 6)
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
         # get alliance id from server id from keys.json
@@ -70,6 +72,8 @@ class Alliance(commands.Cog):
 
     @commands.command()
     async def activity(self, ctx, alliance_id):
+        # level 1 command
+        helpers.check(ctx, 1)
         alliance_id = int(alliance_id)
         url = f"https://politicsandwar.com/api/nations/?alliance_id={alliance_id}&key={helpers.apikey()}"
         response = requests.get(url).json()
@@ -90,7 +94,7 @@ class Alliance(commands.Cog):
         for (minimum, maximum, label) in notable_times:
             raw = len([n for n in activity if maximum >= n >= minimum])
             percent = int(round(100*(raw/len(activity)), 0))
-            embed.add_field(name=f"{raw} ({percent}%)", value=label.capitalize(), inline=False)
+            embed.add_field(name=str(raw), value=label.capitalize(), inline=False)
         await ctx.send(embed=embed)
 
     @activity.error
