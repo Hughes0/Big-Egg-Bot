@@ -238,6 +238,8 @@ class Settings(commands.Cog):
     
     @commands.command()
     async def addproject(self, ctx, name, description, image_url, *cost):
+        # level 10 command
+        helpers.check(ctx, 10)
         try:
             cost = helpers.get_arguments(cost)
         except:
