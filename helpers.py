@@ -43,12 +43,14 @@ def read_query(filename, query, arguments=None):
         raise Exception(e)
 
 
-def apikey(alliance_id=None, requests_needed=1, bank_access=False):
+def apikey(alliance_id=None, requests_needed=1, bank_access=False, owner=None):
     query = f"SELECT * FROM keys WHERE requests_remaining >= {requests_needed}"
     if alliance_id:
         query += f" AND alliance_id = {alliance_id}"
     if bank_access:
         query += f" AND alliance_position >= 4"
+    if owner:
+        query += f" AND owner = '{owner}'"
     results = read_query('databases/keys.sqlite', query)
     if not bank_access:
         non_bank_keys = []
