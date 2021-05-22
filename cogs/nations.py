@@ -54,6 +54,7 @@ class Nations(commands.Cog):
         helpers.catch_api_error(data, version=2)
         nations = data['data']
         for nation in nations:
+            # map v2 policy code to name
             domestic_policy = helpers.api_v2_dom_policy(nation['domestic_policy'])
             war_policy = helpers.api_v2_war_policy(nation['war_policy'])
             embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}")
@@ -64,7 +65,7 @@ class Nations(commands.Cog):
     @policies.error
     async def policies_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
 
 
 def setup(bot):
