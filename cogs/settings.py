@@ -129,6 +129,9 @@ class Settings(commands.Cog):
     async def apikey(self, ctx):
         # level 10 command
         helpers.check(ctx, 10)
+        # allow only to be used in bee-testing channel
+        if ctx.channel.id != 720314189410992209:
+            raise Exception("Missing permissions")
         # case no action selected
         if ctx.invoked_subcommand is None:
             raise Exception("Invalid action")
