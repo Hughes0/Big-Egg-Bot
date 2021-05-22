@@ -42,6 +42,30 @@ class Nations(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}timezone <nation_id>`")
 
+    
+    @commands.command()
+    async def policies(self, ctx, alliance_id, min_cities=0, max_cities=100):
+        try:
+            alliance_id = int(alliance_id)
+        except:
+            raise Exception("Invalid alliance id")
+        url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_id}&alliance_position=2,3,4,5&v_mode=false&min_cities={min_cities}&max_cities={max_cities}"
+        data = requests.get(url).json()
+        helpers.catch_api_error(data, version=2)
+        nations = data['data']
+        for nation in nations:
+            domestic_policy = helpers.api_v2_dom_policy(nation['domestic_policy'])
+            war_policy = helpers.api_v2_war_policy(nation['war_policy'])
+            embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}")
+            embed.add_field(name=domestic_policy, value="Domestic Policy", inline=False)
+            embed.add_field(name=war_policy, value="War Policy", inline=False)
+            await ctx.send(embed=embed)
+
+    @policies.error
+    async def policies_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id>`")
+
 
 def setup(bot):
     bot.add_cog(Nations(bot))
