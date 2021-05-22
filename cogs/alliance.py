@@ -16,16 +16,88 @@ class Alliance(commands.Cog):
 
     
     @commands.command()
-    async def militarization(self, ctx, alliance_id, min_cities=0, max_cities=100):
+    async def militarization(self, ctx, alliance_ids, min_cities=0, max_cities=100):
+        # level 6 command
+        helpers.check(ctx, 6)
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
-        # get alliance militarization
-        # option for overview?
+        nations = []
+        has_more_pages = True
+        page = 1
+        apikey = helpers.apikey(owner="hughes")
+        url = f"https://api.politicsandwar.com/graphql?api_key={apikey}"
+        query = "query{alliances(first:50, id:[%s]) {data {name}}}" % alliance_ids
+        alliances = requests.post(url,json={'query':query}).json()['data']['alliances']['data']
+        alliance_names = [alliance['name'] for alliance in alliances]
+        while has_more_pages:
+            query = """query{nations(first:500, alliance_id: [%s] ,min_cities: %s,max_cities:%s, page:%s) {
+                paginatorInfo {hasMorePages,lastPage}
+                data {id, alliance_position, nation_name, leader_name, num_cities, soldiers, tanks, 
+                aircraft, ships, vmode
+                cities {barracks, factory, airforcebase, drydock
+                }}}}""" % (alliance_ids, str(min_cities), str(max_cities), str(page))
+            data = requests.post(url,json={'query':query}).json()['data']['nations']
+            has_more_pages = data['paginatorInfo']['hasMorePages']
+            nations.extend(data['data'])
+            page += 1
+        total_cities = 0
+        total_barracks = 0
+        total_factories = 0
+        total_hangars = 0
+        total_drydocks = 0
+        total_soldiers = 0
+        total_tanks = 0
+        total_planes = 0
+        total_ships = 0
+        total_nations = 0
+        for nation in nations:
+            if nation['alliance_position'] == "APPLICANT" or nation['vmode'] > 0:
+                continue
+            total_nations += 1
+            cities = nation['num_cities']
+            soldiers = nation['soldiers']
+            tanks = nation['tanks']
+            planes = nation['aircraft']
+            ships = nation['ships']
+            barracks = sum([city['barracks'] for city in nation['cities']])
+            factories = sum([city['factory'] for city in nation['cities']])
+            hangars = sum([city['airforcebase'] for city in nation['cities']])
+            drydocks = sum([city['drydock'] for city in nation['cities']])
+            total_cities += cities
+            total_barracks += barracks
+            total_factories += factories
+            total_hangars += hangars
+            total_drydocks += drydocks
+            total_soldiers += soldiers
+            total_tanks += tanks
+            total_planes += planes
+            total_ships += ships
+        embed = discord.Embed(title=', '.join(alliance_names), description=f"Avg Imps: {round(total_barracks/total_cities,1)} / \
+                {round(total_factories/total_cities,1)} / \
+                {round(total_hangars/total_cities,1)} / \
+                {round(total_drydocks/total_cities,1)}")
+        embed.add_field(name="Total", value=f"""{'{:,}'.format(total_soldiers)}
+                {'{:,}'.format(total_tanks)}
+                {'{:,}'.format(total_planes)}
+                {'{:,}'.format(total_ships)}""", inline=True)
+        embed.add_field(name="Average", value=f"""{'{:,}'.format(int(round(total_soldiers/total_nations,0)))}
+                {'{:,}'.format(int(round(total_tanks/total_nations,0)))}
+                {'{:,}'.format(int(round(total_planes/total_nations,0)))}
+                {'{:,}'.format(int(round(total_ships/total_nations,0)))}""", inline=True)
+        embed.add_field(name="Percent", value=f"""{round((total_soldiers/(total_cities*15000))*100,1)}%
+                {round((total_tanks/(total_cities*1250))*100,1)}%
+                {round((total_planes/(total_cities*75))*100,1)}%
+                {round((total_ships/(total_cities*15))*100,1)}%""", inline=True)
+        embed.set_footer(text=f"{total_nations} nations from c{min_cities} - c{max_cities}")
+        await ctx.send(embed=embed)
+
+
+        
 
     @militarization.error
     async def militarization_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}militarization <alliance_id> [min_cities] [max_cities]`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}militarization <alliance_id(s)> [min_cities] [max_cities]`")
 
 
     @commands.command()
