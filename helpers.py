@@ -119,3 +119,30 @@ def get_arguments(args):
         arg = arg.split("=")
         parsed[arg[0]] = arg[1]
     return parsed
+
+
+def api_v2_dom_policy(code_num):
+    mapping = [
+        "Manifest Destiny",
+        "Open Markets",
+        "Technological Advancement",
+        "Imperialism",
+        "Urbanization"
+    ]
+    return mapping[code_num - 1]
+
+
+def api_v2_war_policy(code_num):
+    mapping = [
+        "Attrition",
+        "Turtle",
+        "Blitzkrieg",
+        "Fortress",
+        "Moneybags",
+        "Pirate",
+        "Tactician",
+        "Guardian",
+        "Covert",
+        "Arcane"
+    ]
+    return mapping[code_num - 1]
