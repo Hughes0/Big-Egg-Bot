@@ -48,9 +48,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command(brief="War ranges")
+    @commands.check(helpers.perms_one)
     async def range(self, ctx, score):
-        # level 1 command
-        helpers.check(ctx, 1)
         try:
             score = float(score.replace(',', ''))
             if score > 25000:
@@ -73,9 +72,8 @@ class Calculations(commands.Cog):
         
 
     @commands.command(brief="Ground battle simulator")
+    @commands.check(helpers.perms_one)
     async def ground(self, ctx, att_soldiers, att_tanks, def_soldiers, def_tanks):
-        # level 1 command
-        helpers.check(ctx, 1)
         try:
             att_soldiers = int(att_soldiers.replace(',', ''))
             att_tanks = int(att_tanks.replace(',', ''))
@@ -103,9 +101,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command(brief="Airstrike simulator")
+    @commands.check(helpers.perms_one)
     async def air(self, ctx, att_planes, def_planes):
-        # level 1 command
-        helpers.check(ctx, 1)
         try:
             att_planes = int(att_planes.replace(',', ''))
             def_planes = int(def_planes.replace(',', ''))
@@ -131,9 +128,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command(brief="Naval battle simulator")
+    @commands.check(helpers.perms_one)
     async def naval(self, ctx, att_ships, def_ships):
-        # level 1 command
-        helpers.check(ctx, 1)
         try:
             att_ships = int(att_ships.replace(',', ''))
             def_ships = int(def_ships.replace(',', ''))
@@ -159,9 +155,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command(brief="City costs calculator")
+    @commands.check(helpers.perms_one)
     async def citycosts(self, ctx, start_city, goal_city, project, percent_discount):
-        # level 1 command
-        helpers.check(ctx, 1)
         # check if inputs are valid
         try:
             start_city = int(start_city)
@@ -203,9 +198,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_one)
     async def infracosts(self, ctx, start_infra, goal_infra, cities, percent_discount):
-        # level 1 command
-        helpers.check(ctx, 1)
         # check if inputs are valid
         try:
             start_infra = int(start_infra)
@@ -253,9 +247,8 @@ class Calculations(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_two)
     async def spies(self, ctx, nation_id):
-        # level 2 command
-        helpers.check(ctx, 2)
         # check if inputs are valid
         try:
             nation_id = int(nation_id)
@@ -310,6 +303,7 @@ class Calculations(commands.Cog):
         data['discord_to_alliance'][str(ctx.guild.id)]
         # get wc reqs based on alliance
         # return in embed
+        await ctx.send("Command incomplete")
         
         
     @warchest.error

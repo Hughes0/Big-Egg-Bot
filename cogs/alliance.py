@@ -16,9 +16,8 @@ class Alliance(commands.Cog):
 
     
     @commands.command()
+    @commands.check(helpers.perms_six)
     async def militarization(self, ctx, alliance_ids, min_cities=0, max_cities=100):
-        # level 6 command
-        helpers.check(ctx, 6)
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
         nations = []
@@ -72,7 +71,8 @@ class Alliance(commands.Cog):
             total_tanks += tanks
             total_planes += planes
             total_ships += ships
-        embed = discord.Embed(title=', '.join(alliance_names), description=f"Avg Imps: {round(total_barracks/total_cities,1)} / \
+        embed = discord.Embed(title=', '.join(alliance_names) + "Militarization", description=f"Avg Imps: \
+                {round(total_barracks/total_cities,1)} / \
                 {round(total_factories/total_cities,1)} / \
                 {round(total_hangars/total_cities,1)} / \
                 {round(total_drydocks/total_cities,1)}")
@@ -101,9 +101,8 @@ class Alliance(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_six)
     async def aaspies(self, ctx, min_cities=0, max_cities=100):
-        # level 6 command
-        helpers.check(ctx, 6)
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
         # get alliance id from server id from keys.json
@@ -143,9 +142,8 @@ class Alliance(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_one)
     async def activity(self, ctx, alliance_id):
-        # level 1 command
-        helpers.check(ctx, 1)
         alliance_id = int(alliance_id)
         url = f"https://politicsandwar.com/api/nations/?alliance_id={alliance_id}&key={helpers.apikey()}"
         response = requests.get(url).json()
@@ -176,9 +174,8 @@ class Alliance(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_six)
     async def counters(self, ctx, att_nation_id, def_alliance_id=None):
-        # level 6 command
-        helpers.check(ctx, 6)
         if not def_alliance_id:
             # get alliance id from server id from keys.json
             data = helpers.get_data()

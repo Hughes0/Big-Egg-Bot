@@ -81,7 +81,41 @@ def check(ctx, level):
     for role in roles:
         if role in allowed_roles:
             return True
-    raise Exception("Missing permissions")
+    return False
+    # raise Exception("Missing permissions")
+
+
+def perms_ten(ctx):
+    return check(ctx, 10)
+
+def perms_nine(ctx):
+    return check(ctx, 9)
+
+def perms_eight(ctx):
+    return check(ctx, 8)
+
+def perms_seven(ctx):
+    return check(ctx, 7)
+
+def perms_six(ctx):
+    return check(ctx, 6)
+
+def perms_five(ctx):
+    return check(ctx, 5)
+
+def perms_four(ctx):
+    return check(ctx, 4)
+
+def perms_three(ctx):
+    return check(ctx, 3)
+
+def perms_two(ctx):
+    return check(ctx, 2)
+
+def perms_one(ctx):
+    return check(ctx, 1)
+
+
 
 
 def check_city_inputs(min_cities, max_cities):

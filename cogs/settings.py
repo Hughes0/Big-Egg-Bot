@@ -32,9 +32,8 @@ class Settings(commands.Cog):
 
 
     @commands.group(pass_context=True)
+    @commands.check(helpers.perms_ten)
     async def permissions(self, ctx):
-        # level 10 command
-        helpers.check(ctx, 10)
         # case no action selected
         if ctx.invoked_subcommand is None:
             raise Exception("Invalid action")
@@ -126,9 +125,8 @@ class Settings(commands.Cog):
 
 
     @commands.group(pass_context=True)
+    @commands.check(helpers.perms_ten)
     async def apikey(self, ctx):
-        # level 10 command
-        helpers.check(ctx, 10)
         # allow only to be used in bee-testing channel
         if ctx.channel.id != 720314189410992209:
             raise Exception("Missing permissions")
@@ -240,9 +238,8 @@ class Settings(commands.Cog):
 
     
     @commands.command()
+    @commands.check(helpers.perms_ten)
     async def addproject(self, ctx, name, description, image_url, *cost):
-        # level 10 command
-        helpers.check(ctx, 10)
         try:
             cost = helpers.get_arguments(cost)
         except:

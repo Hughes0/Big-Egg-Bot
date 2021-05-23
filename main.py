@@ -26,9 +26,8 @@ def edit_cog(func, cog, action):
 
 
 @bot.command()
+@commands.check(helpers.perms_ten)
 async def load(ctx, cog=None):
-    # level 10 command
-    helpers.check(ctx, 10)
     # loads cogs
     if not cog:
         for cog in get_cogs():
@@ -38,9 +37,8 @@ async def load(ctx, cog=None):
 
 
 @bot.command()
+@commands.check(helpers.perms_ten)
 async def unload(ctx, cog=None):
-    # level 10 command
-    helpers.check(ctx, 10)
     # unloads cogs
     if not cog:
         for cog in get_cogs():
@@ -50,9 +48,8 @@ async def unload(ctx, cog=None):
 
 
 @bot.command()
+@commands.check(helpers.perms_ten)
 async def reload(ctx, cog=None):
-    # level 10 command
-    helpers.check(ctx, 10)
     # reloads cogs
     if not cog:
         for cog in get_cogs():
@@ -88,7 +85,7 @@ async def on_command_error(ctx, error):
         pass
     # missing permissions
     elif isinstance(error,commands.CheckFailure):
-        await ctx.send("Check failed")
+        await ctx.send("Check failed (missing permissions)")
     # command does not exist
     elif isinstance(error,commands.CommandNotFound):
         await ctx.send("Command not found")

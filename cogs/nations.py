@@ -16,9 +16,8 @@ class Nations(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_six)
     async def timezone(self, ctx, nation_id):
-        # level 6 command
-        helpers.check(ctx, 6)
         try:
             nation_id = int(nation_id)
         except:
@@ -44,6 +43,7 @@ class Nations(commands.Cog):
 
     
     @commands.command()
+    @commands.check(helpers.perms_six)
     async def policies(self, ctx, alliance_id, min_cities=0, max_cities=100):
         try:
             alliance_id = int(alliance_id)

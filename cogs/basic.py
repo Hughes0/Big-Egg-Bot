@@ -16,9 +16,8 @@ class Basic(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_one)
     async def project(self, ctx, name):
-        # level 1 command
-        helpers.check(ctx, 1)
         if not name:
             raise ValueError("Missing name")
         query = f"""
