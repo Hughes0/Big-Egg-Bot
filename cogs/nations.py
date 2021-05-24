@@ -68,5 +68,29 @@ class Nations(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
 
 
+    @commands.command()
+    async def warvis(self, ctx, alliance_ids):
+        url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
+        response = requests.get(url).json()
+        if not response['api_request']['success']:
+            raise Exception(f"Error fetching v2 nations API for alliances {alliance_ids}")
+        nations = response['data']
+        with open("../warvis.csv", "w") as f:
+            f.write("ID, Nation, Leader, Alliance, Cities, Score, Def, Off, Beige, Soldiers, Tanks, Planes, Ships\n")
+            for nation in nations:
+                entry = f"{nation['nation_id']}, {nation['nation']}, {nation['leader']}, {nation['alliance']}, {nation['cities']}, \
+{nation['score']}, {nation['defensive_wars']}, {nation['offensive_wars']}, {nation['beige_turns']}, \
+{nation['soldiers']}, {nation['tanks']}, {nation['aircraft']}, {nation['ships']}\n"
+                f.write(entry)
+        await ctx.send(file=discord.File('../warvis.csv'))
+
+
+    
+    @warvis.error
+    async def warvis_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
+
+
 def setup(bot):
     bot.add_cog(Nations(bot))
