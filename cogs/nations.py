@@ -75,6 +75,8 @@ class Nations(commands.Cog):
         if not response['api_request']['success']:
             raise Exception(f"Error fetching v2 nations API for alliances {alliance_ids}")
         nations = response['data']
+        by_cities = lambda nation: nation['cities']
+        nations.sort(reverse=True, key=by_cities)
         with open("../warvis.csv", "w") as f:
             f.write("ID, Nation, Leader, Alliance, Cities, Score, Def, Off, Beige, Soldiers, Tanks, Planes, Ships\n")
             for nation in nations:
