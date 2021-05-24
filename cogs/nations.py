@@ -80,7 +80,7 @@ class Nations(commands.Cog):
         with open("../warvis.csv", "w") as f:
             f.write("ID, Nation, Leader, Alliance, Cities, Score, Def, Off, Beige, Soldiers, Tanks, Planes, Ships\n")
             for nation in nations:
-                entry = f"{nation['nation_id']}, {nation['nation']}, {nation['leader']}, {nation['alliance']}, {nation['cities']}, \
+                entry = f"https://politicsandwar.com/nation/id={nation['nation_id']}, {nation['nation']}, {nation['leader']}, {nation['alliance']}, {nation['cities']}, \
 {nation['score']}, {nation['defensive_wars']}, {nation['offensive_wars']}, {nation['beige_turns']}, \
 {nation['soldiers']}, {nation['tanks']}, {nation['aircraft']}, {nation['ships']}\n"
                 f.write(entry)
