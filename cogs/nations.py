@@ -95,7 +95,7 @@ class Nations(commands.Cog):
     @commands.command()
     @commands.check(helpers.perms_six)
     async def raidfinder(self, ctx, min_score, max_score, min_loot, max_beige_turns, min_open_slots, results):
-        if results > 30:
+        if int(results) > 30:
             raise Exception("Too many results selected, max is 30")
         # disallowed_alliances = ["7450"]
         # disallowed_alliances_query = " OR ".join(disallowed_alliances)
@@ -105,7 +105,11 @@ class Nations(commands.Cog):
             while '  ' in text:
                 text = text.replace('  ', ' ')
             return text
-        query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY random() LIMIT ?"
+        if ctx.guild.id == 700094396653240341:
+            query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY total_loot_value DESC LIMIT ?"
+        else:
+            query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? AND alliance_id = 0 ORDER BY total_loot_value DESC LIMIT ?"
+
         result = helpers.read_query('databases/raids.sqlite', query, (min_score, max_score, min_loot, max_beige_turns, min_open_slots, results))
         await ctx.send(f"**{len(result)}** nations found")
         for entry in result:
