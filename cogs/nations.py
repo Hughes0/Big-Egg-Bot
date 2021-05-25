@@ -86,12 +86,43 @@ class Nations(commands.Cog):
                 f.write(entry)
         await ctx.send(file=discord.File('../warvis.csv'))
 
-
-    
     @warvis.error
     async def warvis_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def raidfinder(self, ctx, min_score, max_score, min_loot, max_beige_turns, min_open_slots, results):
+        if results > 30:
+            raise Exception("Too many results selected, max is 30")
+        # disallowed_alliances = ["7450"]
+        # disallowed_alliances_query = " OR ".join(disallowed_alliances)
+        # AND NOT ({disallowed_alliances_query})
+        def prettify_loot(text):
+            text = text.replace('\r\n', '')
+            while '  ' in text:
+                text = text.replace('  ', ' ')
+            return text
+        query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY random() LIMIT ?"
+        result = helpers.read_query('databases/raids.sqlite', query, (min_score, max_score, min_loot, max_beige_turns, min_open_slots, results))
+        await ctx.send(f"**{len(result)}** nations found")
+        for entry in result:
+            text = f"""https://politicsandwar.com/nation/id={entry[0]}
+Looted in war type **{entry[3]}** on **{entry[6]}**
+Beige Loot: {prettify_loot(entry[7])}
+Alliance Loot: {prettify_loot(entry[9])}
+Total Value: **${'{:,}'.format(entry[-1])}**
+-----
+            """
+            await ctx.send(text)
+        await ctx.send(f"Done, {len(result)} nations found")
+
+    @raidfinder.error
+    async def raidfinder_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}raidfinder <score> <min_loot>`")
 
 
 def setup(bot):
