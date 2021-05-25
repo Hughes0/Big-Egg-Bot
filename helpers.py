@@ -12,6 +12,17 @@ def get_data():
     return data
 
 
+def login(session):
+    login_url = "https://politicsandwar.com/login/"
+    data = get_data()
+    login_data = {
+        "email": data['email'],
+        "password": data['password'],
+        "loginform": "Login"
+    }
+    session.post(url=login_url, data=login_data)
+
+
 def execute_query(filename, query, arguments=None):
     # execute a write query on a database
     connection = sqlite3.connect(filename)
