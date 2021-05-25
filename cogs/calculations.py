@@ -88,10 +88,10 @@ class Calculations(commands.Cog):
         immense, moderate, pyrrhic, failure, color = battle_odds(att_value, def_value)
         description = f"{att_soldiers} soldiers and {att_tanks} tanks vs\n{def_soldiers} soldiers and {def_tanks} tanks"
         embed = discord.Embed(title="Ground Battle Simulator", description=description, color=color)
-        embed.add_field(name=f"{immense}%", value="Immense Triumph", inline=False)
-        embed.add_field(name=f"{moderate}%", value="Moderate Success", inline=False)
-        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory", inline=False)
-        embed.add_field(name=f"{failure}%", value="Utter Failure", inline=False)
+        embed.add_field(name=f"{immense}%", value="Immense Triumph (10 res)", inline=False)
+        embed.add_field(name=f"{moderate}%", value="Moderate Success (7 res)", inline=False)
+        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory (4 res)", inline=False)
+        embed.add_field(name=f"{failure}%", value="Utter Failure (0 res)", inline=False)
         await ctx.send(embed=embed)
 
     @ground.error
@@ -115,10 +115,10 @@ class Calculations(commands.Cog):
         immense, moderate, pyrrhic, failure, color = battle_odds(att_value, def_value)
         description = f"{att_planes} planes vs\n{def_planes} planes"
         embed = discord.Embed(title="Airstrike Simulator", description=description, color=color)
-        embed.add_field(name=f"{immense}%", value="Immense Triumph", inline=False)
-        embed.add_field(name=f"{moderate}%", value="Moderate Success", inline=False)
-        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory", inline=False)
-        embed.add_field(name=f"{failure}%", value="Utter Failure", inline=False)
+        embed.add_field(name=f"{immense}%", value="Immense Triumph (12 res)", inline=False)
+        embed.add_field(name=f"{moderate}%", value="Moderate Success (9 res)", inline=False)
+        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory (6 res)", inline=False)
+        embed.add_field(name=f"{failure}%", value="Utter Failure (0 res)", inline=False)
         await ctx.send(embed=embed)
 
     @air.error
@@ -142,10 +142,10 @@ class Calculations(commands.Cog):
         immense, moderate, pyrrhic, failure, color = battle_odds(att_value, def_value)
         description = f"{att_ships} ships vs\n{def_ships} ships"
         embed = discord.Embed(title="Naval Battle Simulator", description=description, color=color)
-        embed.add_field(name=f"{immense}%", value="Immense Triumph", inline=False)
-        embed.add_field(name=f"{moderate}%", value="Moderate Success", inline=False)
-        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory", inline=False)
-        embed.add_field(name=f"{failure}%", value="Utter Failure", inline=False)
+        embed.add_field(name=f"{immense}%", value="Immense Triumph (14 res)", inline=False)
+        embed.add_field(name=f"{moderate}%", value="Moderate Success (11 res)", inline=False)
+        embed.add_field(name=f"{pyrrhic}%", value="Pyrrhic Victory (8 res)", inline=False)
+        embed.add_field(name=f"{failure}%", value="Utter Failure (0 res)", inline=False)
         await ctx.send(embed=embed)
 
     @naval.error
