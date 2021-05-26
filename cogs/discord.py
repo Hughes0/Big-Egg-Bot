@@ -71,7 +71,8 @@ class Discord(commands.Cog):
                     user = discord.utils.get(ctx.guild.members, display_name=str(person))
                     hitters.append(user)
             room = await make_warroom(ctx, entries[0], category=category, hitters=hitters)
-            await room.send(f"ORDERS:\n{orders}")
+            pings = [f"<@!{user.id}>" for user in hitters]
+            await room.send(f"ORDERS: {' '.join(pings)}\n{orders}")
 
 
 

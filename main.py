@@ -99,7 +99,7 @@ async def on_ready():
     print(f"{bot.user.name} is online")
     print("-----")
     # set bot activity to help command
-    game = discord.Game(f"{bot.command_prefix}help")
+    game = discord.Game(f"{bot.command_prefix}help the low tier")
     await bot.change_presence(activity=game)
     # create permissions table
     create_permissions_table = """
