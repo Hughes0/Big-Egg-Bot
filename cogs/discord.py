@@ -61,6 +61,8 @@ class Discord(commands.Cog):
         content = requests.get(attachment_url).content.decode()
         for line in content.split('\n'):
             entries = [entry.rstrip().lstrip() for entry in line.split(",")]
+            if not entries[0]:
+                continue
             category = entries[-1].replace('"', '')
             hitters = []
             for person in entries[1:4]:
