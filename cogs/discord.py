@@ -67,7 +67,7 @@ class Discord(commands.Cog):
             hitters = []
             for person in entries[1:4]:
                 if person:
-                    user = discord.utils.get(ctx.guild.members, name=person)
+                    user = discord.utils.get(ctx.guild.members, display_name=str(person))
                     hitters.append(user)
             await make_warroom(ctx, entries[0], category=category, hitters=hitters)
             
