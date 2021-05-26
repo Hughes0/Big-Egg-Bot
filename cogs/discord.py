@@ -3,6 +3,7 @@ from discord.ext import commands
 import requests
 import json
 import discord.utils
+import csv
 import sys
 sys.path.append('..')
 import helpers
@@ -59,20 +60,23 @@ class Discord(commands.Cog):
     async def mass_warroom(self, ctx):
         attachment_url = ctx.message.attachments[0].url
         content = requests.get(attachment_url).content.decode()
-        for line in content.split('\n'):
-            entries = [entry.rstrip().lstrip() for entry in line.split(",")]
-            if not entries[0]:
-                continue
-            category = entries[-2].replace('"', '')
-            orders = entries[-1].replace('"', '')
-            hitters = []
-            for person in entries[1:4]:
-                if person:
-                    user = discord.utils.get(ctx.guild.members, display_name=str(person))
-                    hitters.append(user)
-            room = await make_warroom(ctx, entries[0], category=category, hitters=hitters)
-            pings = [f"<@!{user.id}>" for user in hitters]
-            await room.send(f"ORDERS: {' '.join(pings)}\n{orders}")
+        with open('../blitz.csv', 'w') as f:
+            f.write(content)
+        with open('../blitz.csv', 'r') as f:
+            reader = csv.reader(f, delimiter=",")
+            for row in reader:
+                if not row[0]:
+                    continue
+                category = row[-2].replace('"', '')
+                orders = row[-1].replace('"', '')
+                hitters = []
+                for person in row[1:4]:
+                    if person:
+                        user = discord.utils.get(ctx.guild.members, display_name=str(person))
+                        hitters.append(user)
+                room = await make_warroom(ctx, row[0], category=category, hitters=hitters)
+                pings = [f"<@!{user.id}>" for user in hitters]
+                await room.send(f"ORDERS: {' '.join(pings)}\n{orders}")
 
 
 
