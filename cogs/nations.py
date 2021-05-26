@@ -118,6 +118,8 @@ Looted in war type **{entry[3]}** on **{entry[6]}**
 Beige Loot: {prettify_loot(entry[7])}
 Alliance Loot: {prettify_loot(entry[9])}
 Total Value: **${'{:,}'.format(entry[-1])}**
+**{entry[2]}** Beige Turns
+**{entry[4]}** Open Def Slots
 -----
             """
             await ctx.send(text)
