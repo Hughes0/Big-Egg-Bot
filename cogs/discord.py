@@ -63,14 +63,15 @@ class Discord(commands.Cog):
             entries = [entry.rstrip().lstrip() for entry in line.split(",")]
             if not entries[0]:
                 continue
-            category = entries[-1].replace('"', '')
+            category = entries[-2].replace('"', '')
+            orders = entries[-1].replace('"', '')
             hitters = []
             for person in entries[1:4]:
                 if person:
                     user = discord.utils.get(ctx.guild.members, display_name=str(person))
                     hitters.append(user)
-            await make_warroom(ctx, entries[0], category=category, hitters=hitters)
-            
+            room = await make_warroom(ctx, entries[0], category=category, hitters=hitters)
+            await room.send(f"ORDERS:\n{orders}")
 
 
 
