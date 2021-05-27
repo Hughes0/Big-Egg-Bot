@@ -273,6 +273,7 @@ class Calculations(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_ten)
     async def warchest(self, ctx, cities):
         # check if input is valid
         try:

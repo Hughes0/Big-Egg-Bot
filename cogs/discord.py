@@ -56,7 +56,7 @@ class Discord(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warroom <defender_id> [category]`")
 
     @commands.command()
-    @commands.check(helpers.perms_eight)
+    @commands.check(helpers.perms_nine)
     async def mass_warroom(self, ctx):
         attachment_url = ctx.message.attachments[0].url
         content = requests.get(attachment_url).content.decode()

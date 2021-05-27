@@ -69,6 +69,7 @@ class Nations(commands.Cog):
 
 
     @commands.command()
+    @commands.check(helpers.perms_nine)
     async def warvis(self, ctx, alliance_ids):
         url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
         response = requests.get(url).json()
