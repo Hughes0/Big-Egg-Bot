@@ -74,9 +74,12 @@ class Discord(commands.Cog):
                     if person:
                         user = discord.utils.get(ctx.guild.members, display_name=str(person))
                         hitters.append(user)
-                room = await make_warroom(ctx, row[0], category=category, hitters=hitters)
-                pings = [f"<@!{user.id}>" for user in hitters]
-                await room.send(f"ORDERS: {' '.join(pings)}\n{orders}")
+                try:
+                    room = await make_warroom(ctx, row[0], category=category, hitters=hitters)
+                    pings = [f"<@!{user.id}>" for user in hitters]
+                    await room.send(f"ORDERS: {' '.join(pings)}\n{orders}")
+                except:
+                    await ctx.send(f"Error creating room for `{row}`")
 
 
 
