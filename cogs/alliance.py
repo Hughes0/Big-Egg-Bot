@@ -16,7 +16,7 @@ class Alliance(commands.Cog):
         self.bot = bot
 
     
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @commands.check(helpers.perms_six)
     async def militarization(self, ctx, alliance_ids, min_cities=0, max_cities=100):
         # check if inputs are valid
@@ -72,7 +72,7 @@ class Alliance(commands.Cog):
             total_tanks += tanks
             total_planes += planes
             total_ships += ships
-        embed = discord.Embed(title=', '.join(alliance_names) + "Militarization", description=f"Avg Imps: \
+        embed = discord.Embed(title=', '.join(alliance_names) + " Militarization", description=f"Avg Imps: \
                 {round(total_barracks/total_cities,1)} / \
                 {round(total_factories/total_cities,1)} / \
                 {round(total_hangars/total_cities,1)} / \
@@ -92,6 +92,43 @@ class Alliance(commands.Cog):
         embed.set_footer(text=f"{total_nations} nations from c{min_cities} - c{max_cities}")
         await ctx.send(embed=embed)
 
+    @militarization.command()
+    async def planes(self, ctx, min_cities=0, max_cities=100):
+        apikey = helpers.apikey()
+        # get top 50 alliances
+        url = f"https://politicsandwar.com/api/alliances/?key={apikey}"
+        response = requests.get(url).json()
+        helpers.catch_api_error(response, version=1)
+        alliances = response['alliances'][:30]
+        ids = [alliance['id'] for alliance in alliances]
+        # get nations from top 50 alliances
+        url = f"https://politicsandwar.com/api/v2/nations/{apikey}/&alliance_id={','.join(ids)} \
+                &alliance_position=2,3,4,5&v_mode=false&min_cities={min_cities}&max_cities={max_cities}"
+        nations = requests.get(url).json()
+        helpers.catch_api_error(nations, version=2)
+        nations = nations['data']
+        alliance_data = []
+        for alliance in alliances:
+            alliance_id = str(alliance['id'])
+            members = [nation for nation in nations if int(nation['alliance_id'] == int(alliance_id))]
+            total_planes = sum([member['aircraft'] for member in members])
+            total_cities = sum(member['cities'] for member in members)
+            alliance_data.append({
+                "name": alliance['name'],
+                "total_planes": total_planes,
+                "percent_planes": total_planes / (total_cities * 75)
+            })
+        by_plane_percent = lambda nation: nation['percent_planes']
+        alliance_data.sort(key=by_plane_percent, reverse=True)
+        text = "```\n"
+        text += "".join(["Alliance".ljust(35), "%".ljust(9), "total".ljust(9), "\n"])
+        for alliance in alliance_data[:30]:
+            text += "".join([alliance['name'].ljust(35), \
+                    str(round(alliance['percent_planes']*100,1)).ljust(9), \
+                    str('{:,}'.format(alliance['total_planes'])).ljust(9), "\n"])
+        text += "\n```"
+        await ctx.send(text)
+        # calculate militarization from there
 
         
 
