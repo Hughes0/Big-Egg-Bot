@@ -63,6 +63,7 @@ class Discord(commands.Cog):
         with open('../blitz.csv', 'w') as f:
             f.write(content)
         with open('../blitz.csv', 'r') as f:
+            guild_members = ctx.guild.members
             reader = csv.reader(f, delimiter=",")
             for row in reader:
                 if not row[0]:
@@ -72,7 +73,11 @@ class Discord(commands.Cog):
                 hitters = []
                 for person in row[1:4]:
                     if person:
-                        user = discord.utils.get(ctx.guild.members, display_name=str(person))
+                        # user = discord.utils.get(ctx.guild.members, display_name=str(person))
+                        user = None
+                        for member in guild_members:
+                            if member.display_name.lower() == str(person):
+                                user = member
                         hitters.append(user)
                 try:
                     room = await make_warroom(ctx, row[0], category=category, hitters=hitters)
