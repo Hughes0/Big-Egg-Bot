@@ -3,6 +3,7 @@ from discord.ext import commands
 import requests
 import datetime
 import random
+import concurrent.futures
 import sys
 sys.path.append("..")
 import helpers
@@ -102,20 +103,50 @@ class Alliance(commands.Cog):
 
     @commands.command()
     @commands.check(helpers.perms_six)
-    async def aaspies(self, ctx, min_cities=0, max_cities=100):
+    async def aaspies(self, ctx, alliance_id, min_cities=0, max_cities=100):
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
         # get alliance id from server id from keys.json
         data = helpers.get_data()
-        alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
-        # get alliance-members API data
-        apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)
-        url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
-        data = requests.get(url).json()
-        # catch API errors
-        helpers.catch_api_error(data=data, version=1)
-        nations = data['nations']
-        nations = [nation for nation in nations if nation['cities'] >= min_cities and nation['cities'] <= max_cities]
+        try:
+            discord_alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+        except KeyError:
+            discord_alliance_id = None
+        if discord_alliance_id == int(alliance_id):
+            # get alliance-members API data
+            apikey = helpers.apikey(alliance_id=discord_alliance_id, bank_access=True)
+            url = f"https://politicsandwar.com/api/alliance-members/?allianceid={discord_alliance_id}&key={apikey}"
+            data = requests.get(url).json()
+            # catch API errors
+            helpers.catch_api_error(data=data, version=1)
+            nations = data['nations']
+            nations = [nation for nation in nations if nation['cities'] >= min_cities and nation['cities'] <= max_cities]
+        else:
+            await ctx.send("Calculating, this could take a while...")
+            url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
+            query = """query{
+                nations(first:500,alliance_id:%s,min_cities:%s,max_cities:%s,vmode:false) {
+                    data {
+                        id, nation_name, num_cities, cia, warpolicy
+                        alliance {name}
+                    }
+                }
+            }""" % (str(alliance_id), str(min_cities), str(max_cities))
+            data = requests.post(url,json={'query':query}).json()['data']['nations']['data']
+            ids = [nation['id'] for nation in data]
+            policies = [nation['warpolicy'] for nation in data]
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                spies = executor.map(helpers.spies, ids, policies)
+            spies = [spy for spy in spies]
+            nations = [
+                        {
+                            "nation": data[i]['nation_name'],
+                            "alliance": data[i]['alliance']['name'],
+                            "intagncy": data[i]['cia'],
+                            "cities": data[i]['num_cities'],
+                            "spies": spies[i]
+                        } for i in range(len(spies))
+                    ]
         by_cities = lambda nation: nation['cities']
         nations.sort(key=by_cities, reverse=True)
         # break nations array into embeds with max 20 nations each
@@ -126,7 +157,7 @@ class Alliance(commands.Cog):
                 if i+j >= len(nations):
                     break
                 nation = nations[i+j]
-                if nation['intagncy'] == "1":
+                if nation['intagncy'] == "1" or nation['intagncy'] == True:
                     max_spies = 60
                 else:
                     max_spies = 50
@@ -134,11 +165,12 @@ class Alliance(commands.Cog):
             embed.set_footer(text=f"Page {page}")
             await ctx.send(embed=embed)
             page += 1
+        await ctx.send("All results displayed")
 
     @aaspies.error
     async def aaspies_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}aaspies <min_cities> <max_cities>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}aaspies <alliance_id> [min_cities] [max_cities]`")
 
 
     @commands.command()
