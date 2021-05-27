@@ -76,7 +76,7 @@ class Discord(commands.Cog):
                         # user = discord.utils.get(ctx.guild.members, display_name=str(person))
                         user = None
                         for member in guild_members:
-                            if member.display_name.lower() == str(person):
+                            if member.display_name.lower() == str(person).lower():
                                 user = member
                         hitters.append(user)
                 try:
