@@ -112,7 +112,7 @@ class Alliance(commands.Cog):
             alliance_id = str(alliance['id'])
             members = [nation for nation in nations if int(nation['alliance_id'] == int(alliance_id))]
             total_planes = sum([member['aircraft'] for member in members])
-            total_cities = sum(member['cities'] for member in members)
+            total_cities = max(sum(member['cities'] for member in members), 1)
             alliance_data.append({
                 "name": alliance['name'],
                 "total_planes": total_planes,
@@ -121,7 +121,7 @@ class Alliance(commands.Cog):
         by_plane_percent = lambda nation: nation['percent_planes']
         alliance_data.sort(key=by_plane_percent, reverse=True)
         text = "```\n"
-        text += "".join(["Alliance".ljust(35), "%".ljust(9), "total".ljust(9), "\n"])
+        text += "".join([f"Alliance (c{min_cities} - c{max_cities})".ljust(35), "%".ljust(9), "total".ljust(9), "\n"])
         for alliance in alliance_data[:30]:
             text += "".join([alliance['name'].ljust(35), \
                     str(round(alliance['percent_planes']*100,1)).ljust(9), \
