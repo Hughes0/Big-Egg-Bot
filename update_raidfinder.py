@@ -133,10 +133,6 @@ def get_wars():
 
 
 if __name__ == "__main__":
-    webhook_url = "https://discord.com/api/webhooks/845754784258850836/L4RHKkdmB4MQZEFn3MYYyRzjPfTaeOgBnvQ_uhnZiGR4etkbTXveQr9rQfys8l6sIZ3u"
-    data = {}
-    data['content'] = "Updating raidfinder"
-    result = requests.post(webhook_url, data=json.dumps(data), headers={"Content-Type": "application/json"})
     with open("raidfinder.txt", 'w') as f:
         f.write("disallow")
     global prices
@@ -175,7 +171,6 @@ if __name__ == "__main__":
     get_wars()
     data = {}
     data['content'] = "raidfinder updating complete"
-    result = requests.post(webhook_url, data=json.dumps(data), headers={"Content-Type": "application/json"})
     with open("raidfinder.txt", 'w') as f:
         f.write("allow")
 
