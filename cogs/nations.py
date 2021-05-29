@@ -95,7 +95,7 @@ class Nations(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_six)
+    @commands.check(helpers.perms_two)
     async def raidfinder(self, ctx, min_score, max_score, min_loot, max_beige_turns, min_open_slots, results):
         filename = os.path.dirname(__file__) + '/../raidfinder.txt'
         with open(filename, 'r') as f:
@@ -135,7 +135,7 @@ Total Value: **${'{:,}'.format(entry[-1])}**
     @raidfinder.error
     async def raidfinder_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}raidfinder <score> <min_loot>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}raidfinder <min_score> <max_score> <min_loot> <max_beige_turns> <min_open_slots> <results>`")
 
 
 def setup(bot):

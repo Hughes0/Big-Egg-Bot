@@ -1,4 +1,4 @@
-from os import PRIO_PROCESS
+from os import path
 import requests
 import sqlite3
 from sqlite3 import Error
@@ -135,6 +135,7 @@ def get_wars():
 if __name__ == "__main__":
     with open("raidfinder.txt", 'w') as f:
         f.write("disallow")
+    time.sleep(60)
     global prices
     prices = {
         'coal': 3000,
