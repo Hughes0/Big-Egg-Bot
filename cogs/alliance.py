@@ -372,7 +372,7 @@ class Alliance(commands.Cog):
             query{
                 nations(first: 500,alliance_id:%s,vmode:false,
                         min_cities:%s,max_cities:%s) {
-                    data {id,num_cities,nation_name,leader_name,alliance_position
+                    data {id,num_cities,nation_name,leader_name,alliance_position,last_active
                         offensive_wars{id,def_alliance_id,turnsleft}
                     }
                 }
@@ -393,6 +393,7 @@ class Alliance(commands.Cog):
                 embed.add_field(name="Turns Left", value=text)
                 text = ", ".join([war['def_alliance_id'] for war in active_wars])
                 embed.add_field(name="Def Alliance", value=text)
+            embed.set_footer(text=f"Last Active: {nation['last_active']}")
             await ctx.send(embed=embed)
 
     @raids.error
