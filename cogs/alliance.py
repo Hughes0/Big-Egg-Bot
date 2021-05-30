@@ -370,13 +370,13 @@ class Alliance(commands.Cog):
         url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
         query = """
             query{
-                nations(first: 500,alliance_id:7450,vmode:false,
-                        min_cities:0,max_cities:9) {
+                nations(first: 500,alliance_id:%s,vmode:false,
+                        min_cities:%s,max_cities:%s) {
                     data {id,num_cities,nation_name,leader_name,alliance_position
                         offensive_wars{id,def_alliance_id,turnsleft}
                     }
                 }
-            }"""
+            }""" % (str(alliance_id), str(min_cities), str(max_cities))
         result = requests.post(url,json={'query':query}).json()['data']['nations']['data']
         for nation in result:
             if nation['alliance_position'] == "APPLICANT":
