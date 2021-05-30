@@ -126,6 +126,12 @@ def perms_two(ctx):
 def perms_one(ctx):
     return check(ctx, 1)
 
+def has_account(ctx):
+    # TODO
+    # allow level 10 OR people with an account in account.sqlite
+    return
+
+
 
 
 
@@ -156,6 +162,19 @@ def catch_api_error(data, version):
         pass
     else:
         raise ValueError("Invalid API version for catch_api_error()")
+
+
+def prices(resources):
+    _apikey = apikey()
+    if resources == "all":
+        resources = ["food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]
+    prices_dict = {}
+    for resource in resources:
+        url = f"https://politicsandwar.com/api/tradeprice/?resource={resource}&key={_apikey}"
+        data = requests.get(url).json()
+        catch_api_error(data, version=1)
+        prices_dict[resource] = int(data['avgprice'])
+    return prices_dict
 
 
 def get_arguments(args):

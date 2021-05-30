@@ -301,6 +301,28 @@ class Calculations(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warchest <cities>`")
 
 
+    @commands.command()
+    @commands.check(helpers.perms_one)
+    async def value(self, ctx, *resources):
+        prices = helpers.prices([resources[i+1] for i in range(0, len(resources), 2)])
+        total_value = 0
+        embed = discord.Embed(title="Value")
+        for i in range(0, len(resources), 2):
+            amount = float(resources[i].replace(',', ''))
+            resource = resources[i+1]
+            val = amount * prices[resource]
+            total_value += val
+            embed.add_field(name=f"{'{:,}'.format(amount)} {resource}", value=f"${'{:,}'.format(val)}")
+        embed.title = f"${'{:,}'.format(total_value)}"
+        await ctx.send(embed=embed)
+
+
+
+    @value.error
+    async def value_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}value <amount> <resource> [amount] [resource] ...`")
+
 
 def setup(bot):
     bot.add_cog(Calculations(bot))
