@@ -1,9 +1,10 @@
-from os import PRIO_PROCESS
+from os import path
 import requests
 import sqlite3
 from sqlite3 import Error
 import helpers
 import datetime
+import json
 import time
 
 def parse_loot(text):
@@ -99,7 +100,7 @@ def get_wars():
     page = 1
     while has_more_pages:
         query = """query{
-            nations(first:500, min_score:375, vmode:false, page:%s, alliance_id: %s) {
+            nations(first:100, min_score:375, vmode:false, page:%s, alliance_id: %s) {
                 paginatorInfo {hasMorePages,lastPage}
                 data {id
                 defensive_wars {id, turnsleft,war_type,winner
@@ -112,9 +113,15 @@ def get_wars():
             try:
                 data = requests.post(url,json={'query':query}).json()
                 data = data['data']['nations']
-            except:
+            except Exception as e:
                 print(f"Error: {data}")
-                time.sleep(1)
+                print([key for key in data])
+                try:
+                    print([key for key in data['data']])
+                except:
+                    pass
+                print(e)
+                time.sleep(5)
             else:
                 success = True
         has_more_pages = data['paginatorInfo']['hasMorePages']
@@ -126,6 +133,9 @@ def get_wars():
 
 
 if __name__ == "__main__":
+    with open("raidfinder.txt", 'w') as f:
+        f.write("disallow")
+    time.sleep(60)
     global prices
     prices = {
         'coal': 3000,
@@ -160,6 +170,10 @@ if __name__ == "__main__":
     helpers.execute_query('databases/raids.sqlite', delete_raid_table)
     helpers.execute_query('databases/raids.sqlite', create_raid_table)
     get_wars()
+    data = {}
+    data['content'] = "raidfinder updating complete"
+    with open("raidfinder.txt", 'w') as f:
+        f.write("allow")
 
 
 

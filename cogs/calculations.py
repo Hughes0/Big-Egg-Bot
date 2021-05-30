@@ -59,7 +59,7 @@ class Calculations(commands.Cog):
         min_off, max_off = int(round(score*0.75, 0)), int(round(score*1.75, 0))
         min_def, max_def = int(round(score/1.75, 0)), int(round(score/0.75, 0))
         min_spy, max_spy = int(round(score*0.4, 0)), int(round(score*2.5, 0))
-        embed = discord.Embed(title=f"{score} ns", description="Score Ranges")
+        embed = discord.Embed(title=f"{score} ns", description="Score Ranges", color=ctx.author.color)
         embed.add_field(name=f"{min_off} - {max_off}", value="Offensive War Range", inline=False)
         embed.add_field(name=f"{min_def} - {max_def}", value="Defensive War Range", inline=False)
         embed.add_field(name=f"{min_spy} - {max_spy}", value="Spy Range", inline=False)
@@ -186,7 +186,9 @@ class Calculations(commands.Cog):
             next_city_cost -= (next_city_cost * percent_discount)
             cost += next_city_cost
         cost = round(cost, 2)
-        embed = discord.Embed(title=f"${'{:,}'.format(cost)}", description=f"c{start_city} - c{goal_city}")
+        embed = discord.Embed(title=f"${'{:,}'.format(cost)}", \
+                description=f"c{start_city} - c{goal_city}", \
+                color=ctx.author.color)
         embed.add_field(name=project.upper(), value="Project", inline=False)
         embed.add_field(name=f"{percent_discount*100}%", value="Percent Discount", inline=False)
         await ctx.send(embed=embed)
@@ -239,7 +241,9 @@ class Calculations(commands.Cog):
         total_cost -= (total_cost * percent_discount)
         total_cost = round(total_cost, 1)
         # create embed
-        embed = discord.Embed(title=f"${'{:,}'.format(total_cost)}", description=f"{start_infra} - {goal_infra} infra")
+        embed = discord.Embed(title=f"${'{:,}'.format(total_cost)}", \
+                description=f"{start_infra} - {goal_infra} infra", \
+                color=ctx.author.color)
         embed.add_field(name=cities, value="Cities", inline=False)
         embed.add_field(name=f"{percent_discount*100}%", value="Percent Discount", inline=False)
         await ctx.send(embed=embed)
@@ -262,7 +266,8 @@ class Calculations(commands.Cog):
         war_policy = nation_info['war_policy']
         spies = helpers.spies(nation_id, war_policy)
         embed = discord.Embed(title=f"Nation `id: {nation_id}` has `{spies}` spies",
-                            description=f"[politicsandwar.com/nation/id={nation_id}](https://politicsandwar.com/nation/id={nation_id})")
+                            description=f"[politicsandwar.com/nation/id={nation_id}](https://politicsandwar.com/nation/id={nation_id})", \
+                            color=ctx.author.color)
         embed.set_footer(text=f"War Policy: {war_policy}")
         await ctx.send(embed=embed)
 
