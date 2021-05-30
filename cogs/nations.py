@@ -49,6 +49,7 @@ class Nations(commands.Cog):
             alliance_id = int(alliance_id)
         except:
             raise Exception("Invalid alliance id")
+        helpers.check_city_inputs(min_cities, max_cities)
         url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_id}&alliance_position=2,3,4,5&v_mode=false&min_cities={min_cities}&max_cities={max_cities}"
         data = requests.get(url).json()
         helpers.catch_api_error(data, version=2)
@@ -66,6 +67,43 @@ class Nations(commands.Cog):
     async def policies_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def infra(self, ctx, alliance_id, min_cities=0, max_cities=100):
+        try:
+            alliance_id = int(alliance_id)
+        except:
+            raise Exception("Invalid alliance id")
+        helpers.check_city_inputs(min_cities, max_cities)
+        query = """
+            query{
+                nations(first: 500,alliance_id:%s,vmode:false,
+                        min_cities:%s,max_cities:%s) {
+                    data {id,num_cities,nation_name,leader_name
+                        cities {infrastructure}
+                    }
+                }
+            }""" % (str(alliance_id), str(min_cities), str(max_cities))
+        url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
+        result = requests.post(url,json={'query':query}).json()['data']['nations']['data']
+        for nation in result:
+            infra_dist = [city['infrastructure'] for city in nation['cities']]
+            embed = discord.Embed(title=f"{nation['leader_name']} of {nation['nation_name']}", \
+                    description=f"c{nation['num_cities']}", \
+                    url=f"https://politicsandwar.com/nation/id={nation['id']}")
+            embed.add_field(name=round(sum(infra_dist)/len(infra_dist)), value="Avg Infra")
+            embed.add_field(name=max(infra_dist), value="Highest Infra")
+            embed.add_field(name=min(infra_dist), value="Lowest Infra")
+            # embed.set_footer(text=f"infra for {alliance_id}, c{min_cities} - c{max_cities}")
+            await ctx.send(embed=embed)
+        await ctx.send("Done")
+
+    @infra.error
+    async def infra_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}infra <alliance_id> [min_cities] [max_cities]`")
 
 
     @commands.command()
