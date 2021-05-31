@@ -176,7 +176,7 @@ def prices(resources):
         url = f"https://politicsandwar.com/api/tradeprice/?resource={resource.lower()}&key={_apikey}"
         data = requests.get(url).json()
         catch_api_error(data, version=1)
-        prices_dict[resource] = int(data['avgprice'])
+        prices_dict[resource] = data
     return prices_dict
 
 

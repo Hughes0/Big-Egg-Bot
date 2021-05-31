@@ -310,7 +310,7 @@ class Calculations(commands.Cog):
         for i in range(0, len(resources), 2):
             amount = float(resources[i].replace(',', ''))
             resource = resources[i+1].lower()
-            val = amount * prices[resource]
+            val = amount * int(prices[resource]['avgprice'])
             total_value += val
             embed.add_field(name=f"{'{:,}'.format(amount)} {resource}", value=f"${'{:,}'.format(val)}")
         embed.title = f"${'{:,}'.format(total_value)}"
