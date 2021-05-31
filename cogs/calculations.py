@@ -304,7 +304,7 @@ class Calculations(commands.Cog):
     @commands.command()
     @commands.check(helpers.perms_one)
     async def value(self, ctx, *resources):
-        prices = helpers.prices([resources[i+1] for i in range(0, len(resources), 2)])
+        prices = helpers.prices([resources[i+1].lower() for i in range(0, len(resources), 2)])
         total_value = 0
         embed = discord.Embed(title="Value")
         for i in range(0, len(resources), 2):
