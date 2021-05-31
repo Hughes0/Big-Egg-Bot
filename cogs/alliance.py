@@ -382,7 +382,6 @@ class Alliance(commands.Cog):
             if nation['alliance_position'] == "APPLICANT":
                 continue
             active_wars = [war for war in nation['offensive_wars'] if war['turnsleft'] > 0]
-            # [name](url)
             embed = discord.Embed(title=f"{nation['leader_name']} of {nation['nation_name']}", \
                     description=f"c{nation['num_cities']} with {len(active_wars)} active wars", \
                     url=f"https://politicsandwar.com/nation/id={nation['id']}")
