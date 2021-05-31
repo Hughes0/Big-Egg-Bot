@@ -127,9 +127,12 @@ def perms_one(ctx):
     return check(ctx, 1)
 
 def has_account(ctx):
-    # TODO
     # allow level 10 OR people with an account in account.sqlite
-    return
+    result = [entry[0] for entry in read_query('databases/accounts.sqlite', "SELECT owner_discord_id FROM accounts")]
+    if perms_ten(ctx) or ctx.author.id in result:
+        return True
+    else:
+        return False
 
 
 
@@ -231,3 +234,13 @@ def spies(nation_id, war_policy):
     elif def_spies <= 1:
         def_spies = 0
     return def_spies
+
+
+def rss_list_to_dict(resources):
+    resources_dict = {}
+    for i in range(0, len(resources), 2):
+        resources_dict[resources[i+1]] = float(resources[i])
+    for resource in ["cash", "food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]:
+        if resource not in resources_dict:
+            resources_dict[resource] = 0
+    return resources_dict

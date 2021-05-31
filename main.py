@@ -130,6 +130,27 @@ async def on_ready():
         );
     """
     helpers.execute_query('databases/game_data.sqlite', create_projects_table)
+    # create accounts table
+    create_accounts_table = """
+        CREATE TABLE IF NOT EXISTS accounts (
+            owner_discord_id INTEGER PRIMARY KEY,
+            owner_name TEXT,
+            owner_nation_id TEXT,
+            cash REAL,
+            food REAL,
+            coal REAL,
+            oil REAL,
+            uranium REAL,
+            lead REAL,
+            iron REAL,
+            bauxite REAL,
+            gasoline REAL,
+            munitions REAL,
+            steel REAL,
+            aluminum REAL
+        );
+    """
+    helpers.execute_query('databases/accounts.sqlite', create_accounts_table)
   
 
 
