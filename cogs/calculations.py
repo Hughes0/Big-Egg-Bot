@@ -309,7 +309,7 @@ class Calculations(commands.Cog):
         embed = discord.Embed(title="Value")
         for i in range(0, len(resources), 2):
             amount = float(resources[i].replace(',', ''))
-            resource = resources[i+1]
+            resource = resources[i+1].lower()
             val = amount * prices[resource]
             total_value += val
             embed.add_field(name=f"{'{:,}'.format(amount)} {resource}", value=f"${'{:,}'.format(val)}")

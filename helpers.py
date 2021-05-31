@@ -170,7 +170,7 @@ def prices(resources):
         resources = ["food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]
     prices_dict = {}
     for resource in resources:
-        url = f"https://politicsandwar.com/api/tradeprice/?resource={resource}&key={_apikey}"
+        url = f"https://politicsandwar.com/api/tradeprice/?resource={resource.lower()}&key={_apikey}"
         data = requests.get(url).json()
         catch_api_error(data, version=1)
         prices_dict[resource] = int(data['avgprice'])
