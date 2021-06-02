@@ -3,6 +3,7 @@ from discord.ext import commands
 import math
 import random
 import requests
+import math
 import sys
 sys.path.append('..')
 import helpers
@@ -38,6 +39,168 @@ def battle_odds(att_value, def_value):
     else: 
         color = 0xf0d800 # yellow
     return immense, moderate, pyrrhic, failure, color
+
+
+def city_income(city_id):
+    url = f"https://politicsandwar.com/api/city/id={city_id}&key={helpers.apikey()}"
+    city_data = requests.get(url).json()
+    if "error" in city_data:
+        raise Exception(city_data['error'])
+    url = f"https://politicsandwar.com/api/nation/id={city_data['nationid']}&key={helpers.apikey()}"
+    nation_data = requests.get(url).json()
+    # initialize total income variables
+    gross_cash = 0
+    upkeep = 0
+    net_food = 0
+    net_coal = 0
+    net_oil = 0
+    net_uranium = 0
+    net_lead = 0
+    net_iron = 0
+    net_bauxite = 0
+    net_gasoline = 0
+    net_munitions = 0
+    net_steel = 0
+    net_aluminum = 0
+    # gross cash
+    commerce = city_data['commerce']
+    if int(nation_data['inttradecenter']) == 0:
+        commerce = min(100, commerce)
+    gross_cash += (((commerce/50) * 0.725) + 0.725) * city_data['population']
+    if nation_data['domestic_policy'] == "Open Markets":
+        gross_cash *= 1.01
+    # upkeep
+    upkeep += int(city_data['imp_coalpower']) * 1200
+    upkeep += int(city_data['imp_oilpower']) * 1800
+    upkeep += int(city_data['imp_nuclearpower']) * 10500
+    upkeep += int(city_data['imp_windpower']) * 500
+    upkeep += int(city_data['imp_policestation']) * 750
+    upkeep += int(city_data['imp_hospital']) * 1000
+    upkeep += int(city_data['imp_recyclingcenter']) * 2500
+    upkeep += int(city_data['imp_subway']) * 3250
+    upkeep += int(city_data['imp_supermarket']) * 600
+    upkeep += int(city_data['imp_bank']) * 1800
+    upkeep += int(city_data['imp_mall']) * 5400
+    upkeep += int(city_data['imp_stadium']) * 12150
+    # general rss production function
+    def production(current_imps, max_imps, base_prod):
+        bonus = 1 + ((0.5 * (current_imps - 1)) / (max_imps - 1))
+        return current_imps * base_prod * bonus
+    # food
+    farms = int(city_data['imp_farm'])
+    bonus = 1 + ((0.5 * (farms - 1)) / (20 - 1))
+    in_antarctica = nation_data['contintent'] == "Antarctica"
+    project = nation_data['massirrigation']
+    season_mod = 1
+    if not in_antarctica:
+        season = nation_data['season']
+        if season == "Summer":
+            season_mod = 1.2
+        elif season == "Winter":
+            season_mod = 0.8
+    if project == "0":
+        land_divisor = 500
+    elif project == "1":
+        land_divisor = 400
+    if in_antarctica:
+        land_divisor *= 2
+    # base food production = (land / land divisor) * farms * bonus * 12 (turns in a day)
+    base_prod = (float(city_data['land']) / land_divisor) * farms * bonus * 12
+    # real food production
+    radiation_penalty = nation_data['radiation_index']/(-1000)
+    net_food += max((base_prod * season_mod * (1 + radiation_penalty)) ,0)
+    upkeep += 300*farms
+    # food consumption
+    in_war = nation_data['offensivewars'] == nation_data['defensivewars'] == 0
+    if in_war:
+        soldier_consumption = 750
+    else:
+        soldier_consumption = 500
+    net_food -= round(((city_data['population'] / 1000) + \
+            ((int(nation_data['soldiers']) / nation_data['cities']) / soldier_consumption)), 1)
+    # coal
+    coal_mines = int(city_data['imp_coalmine'])
+    net_coal += production(coal_mines, 10, 3)
+    upkeep += 400 * coal_mines
+    # oil
+    oil_wells = int(city_data['imp_oilwell'])
+    net_oil += production(oil_wells, 10, 3)
+    upkeep += 600 * oil_wells
+    # uranium
+    uranium_mines = int(city_data['imp_uramine'])
+    if nation_data['uraniumenrich'] == "1":
+        base_prod = 6
+    else:
+        base_prod = 3
+    net_uranium += production(uranium_mines, 5, base_prod)
+    # power usage (coal, oil, uranium)
+    infrastructure = float(city_data['infrastructure'])
+    covered_by_nuclear = min(int(city_data['imp_nuclearpower']) * 2000, infrastructure)
+    net_uranium -= math.ceil(covered_by_nuclear / 1000) * 1.2
+    not_covered_by_nuclear = infrastructure - covered_by_nuclear
+    if not_covered_by_nuclear > 0:
+        net_coal -= math.ceil((min(int(city_data['imp_coalpower']) * 500, not_covered_by_nuclear)) / 100) * 1.2
+        net_oil -= math.ceil((min(int(city_data['imp_oilpower']) * 500, not_covered_by_nuclear)) / 100) * 1.2
+    # lead
+    lead_mines = int(city_data['imp_leadmine'])
+    net_lead += production(lead_mines, 10, 3)
+    upkeep += 1500 * lead_mines
+    # iron
+    iron_mines = int(city_data['imp_ironmine'])
+    net_iron += production(iron_mines, 10, 3)
+    upkeep += 1600 * iron_mines
+    # bauxite
+    bauxite_mines = int(city_data['imp_bauxitemine'])
+    net_bauxite += production(bauxite_mines, 10, 3)
+    upkeep += 1600 * bauxite_mines
+    # gasoline
+    oil_refineries = int(city_data['imp_gasrefinery'])
+    if nation_data['emgasreserve'] == "1":
+        base_prod  = 12
+        base_usage = 6
+    else:
+        base_prod = 6
+        base_usage = 3
+    net_gasoline += production(oil_refineries, 5, base_prod)
+    net_oil -= production(oil_refineries, 5, base_usage)
+    upkeep += 4000 * oil_refineries
+    # munitions
+    munitions_factories = int(city_data['imp_munitionsfactory'])
+    if nation_data['armsstockpile'] == "1":
+        base_prod  = 24.12
+        base_usage = 8.04
+    else:
+        base_prod = 18
+        base_usage = 6
+    net_munitions += production(munitions_factories, 5, base_prod)
+    net_lead -= production(munitions_factories, 5, base_usage)
+    upkeep += 3500 * munitions_factories
+    # steel
+    steel_mills = int(city_data['imp_steelmill'])
+    if nation_data['ironworks'] == "1":
+        base_prod  = 12.24
+        base_usage = 4.08
+    else:
+        base_prod = 9
+        base_usage = 3
+    net_steel += production(steel_mills, 5, base_prod)
+    net_coal -= production(steel_mills, 5, base_usage)
+    net_iron -= production(steel_mills, 5, base_usage)
+    upkeep += 4000 * steel_mills
+    # aluminum
+    aluminum_refineries = int(city_data['imp_aluminumrefinery'])
+    if nation_data['bauxiteworks'] == "1":
+        base_prod  = 12.24
+        base_usage = 4.08
+    else:
+        base_prod = 9
+        base_usage = 3
+    net_aluminum += production(aluminum_refineries, 5, base_prod)
+    net_bauxite -= production(aluminum_refineries, 5, base_usage)
+    upkeep += 2500 * aluminum_refineries
+    return gross_cash, upkeep, net_food, net_coal, net_oil, net_uranium, \
+            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum
+
 
 
 
@@ -316,12 +479,40 @@ class Calculations(commands.Cog):
         embed.title = f"${'{:,}'.format(total_value)}"
         await ctx.send(embed=embed)
 
-
-
     @value.error
     async def value_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}value <amount> <resource> [amount] [resource] ...`")
+
+
+    @commands.group(pass_context=True)
+    @commands.check(helpers.perms_two)
+    async def income(self, ctx):
+        # case no action selected
+        if ctx.invoked_subcommand is None:
+            raise Exception("Invalid action")
+
+    @income.command()
+    async def city(self, ctx, city_id):
+        try:
+            city_id = int(city_id)
+        except:
+            raise Exception("Invalid input")
+        
+
+    @income.command()
+    async def nation(self, ctx, nation_id):
+        return
+
+    @income.command()
+    async def alliance(self, ctx, alliance_id):
+        return
+
+    @income.error
+    async def income_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}income <object>`")
+
 
 
 def setup(bot):
