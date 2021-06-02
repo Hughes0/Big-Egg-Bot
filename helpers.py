@@ -180,6 +180,19 @@ def prices(resources):
     return prices_dict
 
 
+def cached_prices():
+    query = "SELECT * FROM prices"
+    result = read_query('databases/game_data.sqlite', query)
+    price_data = {}
+    for entry in result:
+        price_data[entry[0]] = {
+            "sell_market": entry[1],
+            "buy_market": entry[2],
+            "avg_price": entry[3]
+        }
+    return price_data
+
+
 def get_arguments(args):
     parsed = {}
     for arg in args:

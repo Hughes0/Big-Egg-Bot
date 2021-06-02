@@ -151,6 +151,15 @@ async def on_ready():
         );
     """
     helpers.execute_query('databases/accounts.sqlite', create_accounts_table)
+    create_prices_table = """
+        CREATE TABLE IF NOT EXISTS prices (
+            resource TEXT,
+            sell_market INTEGER,
+            buy_market INTEGER,
+            avg_price INTEGER
+        );
+    """
+    helpers.execute_query('databases/game_data.sqlite', create_prices_table)
   
 
 
