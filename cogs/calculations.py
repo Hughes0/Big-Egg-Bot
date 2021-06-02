@@ -498,6 +498,24 @@ class Calculations(commands.Cog):
             city_id = int(city_id)
         except:
             raise Exception("Invalid input")
+        gross_cash, upkeep, net_food, net_coal, net_oil, net_uranium, \
+            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = city_income(city_id)
+        text = f"""
+        Gross Cash: 
+        Upkeep: 
+        Net Cash: 
+        Food: 
+        Coal: 
+        Oil: 
+        Uranium: 
+        Lead: 
+        Iron: 
+        Bauxite: 
+        Gasoline: 
+        Munitions: 
+        Steel: 
+        Aluminum: 
+        """
         
 
     @income.command()
