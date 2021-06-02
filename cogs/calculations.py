@@ -51,7 +51,8 @@ def city_income(city_id):
     # initialize total income variables
     gross_cash = 0
     upkeep = 0
-    net_food = 0
+    food_production = 0
+    food_consumption = 0
     net_coal = 0
     net_oil = 0
     net_uranium = 0
@@ -89,7 +90,7 @@ def city_income(city_id):
     # food
     farms = int(city_data['imp_farm'])
     bonus = 1 + ((0.5 * (farms - 1)) / (20 - 1))
-    in_antarctica = nation_data['contintent'] == "Antarctica"
+    in_antarctica = nation_data['continent'] == "Antarctica"
     project = nation_data['massirrigation']
     season_mod = 1
     if not in_antarctica:
@@ -108,7 +109,7 @@ def city_income(city_id):
     base_prod = (float(city_data['land']) / land_divisor) * farms * bonus * 12
     # real food production
     radiation_penalty = nation_data['radiation_index']/(-1000)
-    net_food += max((base_prod * season_mod * (1 + radiation_penalty)) ,0)
+    food_production += max((base_prod * season_mod * (1 + radiation_penalty)) ,0)
     upkeep += 300*farms
     # food consumption
     in_war = nation_data['offensivewars'] == nation_data['defensivewars'] == 0
@@ -116,7 +117,7 @@ def city_income(city_id):
         soldier_consumption = 750
     else:
         soldier_consumption = 500
-    net_food -= round(((city_data['population'] / 1000) + \
+    food_consumption += round(((city_data['population'] / 1000) + \
             ((int(nation_data['soldiers']) / nation_data['cities']) / soldier_consumption)), 1)
     # coal
     coal_mines = int(city_data['imp_coalmine'])
@@ -136,7 +137,7 @@ def city_income(city_id):
     # power usage (coal, oil, uranium)
     infrastructure = float(city_data['infrastructure'])
     covered_by_nuclear = min(int(city_data['imp_nuclearpower']) * 2000, infrastructure)
-    net_uranium -= math.ceil(covered_by_nuclear / 1000) * 1.2
+    net_uranium -= round(math.ceil(covered_by_nuclear / 1000) * 1.2, 1)
     not_covered_by_nuclear = infrastructure - covered_by_nuclear
     if not_covered_by_nuclear > 0:
         net_coal -= math.ceil((min(int(city_data['imp_coalpower']) * 500, not_covered_by_nuclear)) / 100) * 1.2
@@ -198,7 +199,7 @@ def city_income(city_id):
     net_aluminum += production(aluminum_refineries, 5, base_prod)
     net_bauxite -= production(aluminum_refineries, 5, base_usage)
     upkeep += 2500 * aluminum_refineries
-    return gross_cash, upkeep, net_food, net_coal, net_oil, net_uranium, \
+    return gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum
 
 
@@ -498,24 +499,26 @@ class Calculations(commands.Cog):
             city_id = int(city_id)
         except:
             raise Exception("Invalid input")
-        gross_cash, upkeep, net_food, net_coal, net_oil, net_uranium, \
+        gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = city_income(city_id)
         text = f"""
-        Gross Cash: 
-        Upkeep: 
-        Net Cash: 
-        Food: 
-        Coal: 
-        Oil: 
-        Uranium: 
-        Lead: 
-        Iron: 
-        Bauxite: 
-        Gasoline: 
-        Munitions: 
-        Steel: 
-        Aluminum: 
+        Gross Cash: {gross_cash}
+        Upkeep: {upkeep}
+        Net Cash: {gross_cash - upkeep}
+        Food Prod: {food_production}
+        Food Use: {food_consumption}
+        Coal: {net_coal}
+        Oil: {net_oil}
+        Uranium: {net_uranium}
+        Lead: {net_lead}
+        Iron: {net_iron}
+        Bauxite: {net_bauxite}
+        Gasoline: {net_gasoline}
+        Munitions: {net_munitions}
+        Steel: {net_steel}
+        Aluminum: {net_aluminum}
         """
+        await ctx.send(text)
         
 
     @income.command()
