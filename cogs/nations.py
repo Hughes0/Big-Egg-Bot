@@ -45,19 +45,89 @@ class Nations(commands.Cog):
     @commands.command()
     @commands.check(helpers.perms_nine)
     async def warvis(self, ctx, alliance_ids):
-        url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
-        response = requests.get(url).json()
-        if not response['api_request']['success']:
-            raise Exception(f"Error fetching v2 nations API for alliances {alliance_ids}")
-        nations = response['data']
-        by_cities = lambda nation: nation['cities']
+        url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
+        by_cities = lambda nation: nation['num_cities']
+        nations = []
+        has_more_pages = True
+        page = 1
+        while has_more_pages:
+            query = """query {
+                nations (first:100, alliance_id:[%s], vmode: false, page: %s) {
+                    paginatorInfo {
+                        hasMorePages
+                    }
+                    data {
+                        id
+                        nation_name
+                        leader_name
+                        alliance {
+                            name
+                        }
+                        alliance_position
+                        num_cities
+                        score
+                        defensive_wars {
+                            turnsleft
+                            attacker {
+                                soldiers
+                                tanks
+                                aircraft
+                                ships
+                                num_cities
+                            }
+                        }
+                        offensive_wars {turnsleft}
+                        beigeturns
+                        soldiers
+                        tanks
+                        aircraft
+                        ships
+                    }
+                }
+            }""" % (alliance_ids, str(page))
+            page += 1
+            data = requests.post(url,json={'query':query}).json()['data']['nations']
+            has_more_pages = data['paginatorInfo']['hasMorePages']
+            nations.extend([nation for nation in data['data'] if nation['alliance_position'] != "APPLICANT"])
         nations.sort(reverse=True, key=by_cities)
         with open("../warvis.csv", "w") as f:
-            f.write("ID, Nation, Leader, Alliance, Cities, Score, Def, Off, Beige, Soldiers, Tanks, Planes, Ships\n")
+            f.write("ID, Nation, Leader, Alliance, Cities, Score, Off, Def, Att1, Att2, Att3, Beige, Soldiers, Tanks, Planes, Ships\n")
             for nation in nations:
-                entry = f"https://politicsandwar.com/nation/id={nation['nation_id']}, {nation['nation']}, {nation['leader']}, {nation['alliance']}, {nation['cities']}, \
-{nation['score']}, {nation['defensive_wars']}, {nation['offensive_wars']}, {nation['beige_turns']}, \
-{nation['soldiers']}, {nation['tanks']}, {nation['aircraft']}, {nation['ships']}\n"
+                def_wars = nation['defensive_wars']
+                active_def_wars = [war for war in def_wars if war['turnsleft'] > 0]
+                num_active_def_wars = len(active_def_wars)
+                unit_max = [('soldiers', 15000), ('tanks', 1250), ('aircraft', 75), ('ships', 15)]
+                # if num_active_def_wars >= 1:
+                try:
+                    att1_data = active_def_wars[0]['attacker']
+                    att1 = round(sum([
+                        (att1_data[unit] / (att1_data['num_cities']*cap)) * 100 for unit, cap in unit_max
+                    ]) / 4)
+                except Exception as e:
+                    att1 = ""
+                # if num_active_def_wars >= 2:
+                try:
+                    att2_data = active_def_wars[1]['attacker']
+                    att2 = round(sum([
+                        (att2_data[unit] / (att2_data['num_cities']*cap)) * 100 for unit, cap in unit_max
+                    ]) / 4)
+                except Exception as e:
+                    att2 = ""
+                # if num_active_def_wars >= 3:
+                try:
+                    att3_data = active_def_wars[2]['attacker']
+                    att3 = round(sum([
+                        (att3_data[unit] / (att3_data['num_cities']*cap)) * 100 for unit, cap in unit_max
+                    ]) / 4)
+                except:
+                    att3 = ""
+                off_wars = nation['offensive_wars']
+                entry = f"https://politicsandwar.com/nation/id={nation['id']}, {nation['nation_name']}, \
+{nation['leader_name']}, {nation['alliance']['name']}, {nation['num_cities']}, {nation['score']}, \
+{len([war for war in off_wars if war['turnsleft'] > 0])}, \
+{len([war for war in def_wars if war['turnsleft'] > 0])}, {att1}, {att2}, {att3},\
+{nation['beigeturns']}, {nation['soldiers']}, {nation['tanks']}, \
+{nation['aircraft']}, {nation['ships']}\n"
                 f.write(entry)
         await ctx.send(file=discord.File('../warvis.csv'))
 
