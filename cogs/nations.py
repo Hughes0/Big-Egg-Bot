@@ -68,13 +68,17 @@ class Nations(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_six)
+    @commands.check(helpers.perms_two)
     async def raidfinder(self, ctx, min_score, max_score, min_loot, max_beige_turns, min_open_slots, results):
         if int(results) > 30:
             raise Exception("Too many results selected, max is 30")
         # disallowed_alliances = ["7450"]
         # disallowed_alliances_query = " OR ".join(disallowed_alliances)
         # AND NOT ({disallowed_alliances_query})
+        with open('/home/pi/Code/Big-Egg-Bot/raidfinder.txt', 'r') as f:
+            content = f.read()
+        if 'disallow' in content:
+            raise Exception("Raidfinder updating, please wait")
         def prettify_loot(text):
             text = text.replace('\r\n', '')
             while '  ' in text:
