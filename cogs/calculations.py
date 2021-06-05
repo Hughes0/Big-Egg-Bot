@@ -261,7 +261,7 @@ class Calculations(commands.Cog):
     @ground.error
     async def ground_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}ground <att soldiers> <att tanks> <def soldiers> <def tanks>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}ground <att soldiers> <att tanks> <def soldiers> <def tanks>`")
 
 
     @commands.command(brief="Airstrike simulator")
@@ -288,7 +288,7 @@ class Calculations(commands.Cog):
     @air.error
     async def air_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}air <att planes> <def planes>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}air <att planes> <def planes>`")
 
 
     @commands.command(brief="Naval battle simulator")
@@ -315,7 +315,7 @@ class Calculations(commands.Cog):
     @naval.error
     async def naval_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}naval <att ships> <def ships>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}naval <att ships> <def ships>`")
 
 
     @commands.command(brief="City costs calculator")
@@ -360,7 +360,7 @@ class Calculations(commands.Cog):
     @citycosts.error
     async def citycosts_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}citycosts <start city> <goal city> <project> <percent discount>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}citycosts <start city> <goal city> <project> <percent discount>`")
 
 
     @commands.command()
@@ -438,7 +438,7 @@ class Calculations(commands.Cog):
     @spies.error
     async def spies_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot_command_prefix}spies <nation_id>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}spies <nation_id>`")
 
 
     @commands.command()
