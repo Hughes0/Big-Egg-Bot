@@ -176,5 +176,50 @@ Total Value: **${'{:,}'.format(entry[-1])}**
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}raidfinder <score> <min_loot>`")
 
 
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def resources(self, ctx, nation_id):
+        try:
+            nation_id = int(nation_id)
+        except:
+            raise ValueError("Invalid nation id")
+        # get alliance id from server id from keys.json
+        data = helpers.get_data()
+        alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+        # get alliance-members API data
+        apikey = helpers.apikey(alliance_id=alliance_id, bank_access=True)
+        url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={apikey}"
+        data = requests.get(url).json()
+        # catch API errors
+        helpers.catch_api_error(data=data, version=1)
+        nation = [nation for nation in data['nations'] if nation['nationid'] == nation_id][0]
+        if not nation:
+            raise Exception(f"No nation by that id found in the alliance {alliance_id}")
+        embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}", \
+                description=f"c{nation['cities']} in [{nation['alliance']}](https://politicsandwar.com/alliance/id={nation['allianceid']})", \
+                    color=ctx.author.color)
+        commas = lambda n: "{:,}".format(n)
+        embed.add_field(name=f"${commas(float(nation['money']))}", value="Cash", inline=True)
+        embed.add_field(name=f"{commas(float(nation['coal']))}", value="Coal", inline=True)
+        embed.add_field(name=f"{commas(float(nation['oil']))}", value="Oil", inline=True)
+        embed.add_field(name=f"{commas(float(nation['uranium']))}", value="Uranium", inline=True)
+        embed.add_field(name=f"{commas(float(nation['iron']))}", value="Iron", inline=True)
+        embed.add_field(name=f"{commas(float(nation['lead']))}", value="Lead", inline=True)
+        embed.add_field(name=f"{commas(float(nation['bauxite']))}", value="Bauxite", inline=True)
+        embed.add_field(name=f"{commas(float(nation['gasoline']))}", value="Gasoline", inline=True)
+        embed.add_field(name=f"{commas(float(nation['munitions']))}", value="Munitions", inline=True)
+        embed.add_field(name=f"{commas(float(nation['steel']))}", value="Steel", inline=True)
+        embed.add_field(name=f"{commas(float(nation['aluminum']))}", value="Aluminum", inline=True)
+        embed.add_field(name=f"{commas(float(nation['food']))}", value="Food", inline=True)
+        embed.add_field(name=f"{commas(int(nation['credits']))}", value="Credits", inline=True)
+        embed.set_footer(text=f"{nation['offensivewars']} off wars | {nation['defensivewars']} def wars | {nation['minutessinceactive']} min since active")
+        await ctx.send(embed=embed)
+
+    @resources.error
+    async def resources_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}resources <nation_id>`")
+
+
 def setup(bot):
     bot.add_cog(Nations(bot))
