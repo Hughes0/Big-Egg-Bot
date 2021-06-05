@@ -103,7 +103,7 @@ class Nations(commands.Cog):
                     att1 = round(sum([
                         (att1_data[unit] / (att1_data['num_cities']*cap)) * 100 for unit, cap in unit_max
                     ]) / 4)
-                except Exception as e:
+                except:
                     att1 = ""
                 # if num_active_def_wars >= 2:
                 try:
@@ -111,7 +111,7 @@ class Nations(commands.Cog):
                     att2 = round(sum([
                         (att2_data[unit] / (att2_data['num_cities']*cap)) * 100 for unit, cap in unit_max
                     ]) / 4)
-                except Exception as e:
+                except:
                     att2 = ""
                 # if num_active_def_wars >= 3:
                 try:
