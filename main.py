@@ -88,7 +88,7 @@ async def on_command_error(ctx, error):
         await ctx.send("Check failed (missing permissions)")
     # command does not exist
     elif isinstance(error,commands.CommandNotFound):
-        await ctx.send("Command not found")
+        pass
     # any others
     else:
         await ctx.send(error)
