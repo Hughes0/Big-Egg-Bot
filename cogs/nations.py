@@ -222,7 +222,11 @@ Total Value: **${'{:,}'.format(entry[-1])}**
         data = requests.get(url).json()
         # catch API errors
         helpers.catch_api_error(data=data, version=1)
-        nation = [nation for nation in data['nations'] if nation['nationid'] == nation_id][0]
+        nation = [nation for nation in data['nations'] if nation['nationid'] == nation_id]
+        if not nation:
+            raise Exception("Nation not found")
+        else:
+            nation = nation[0]
         if not nation:
             raise Exception(f"No nation by that id found in the alliance {alliance_id}")
         embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}", \

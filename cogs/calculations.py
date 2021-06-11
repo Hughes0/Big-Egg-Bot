@@ -472,8 +472,11 @@ class Calculations(commands.Cog):
         total_value = 0
         embed = discord.Embed(title="Value")
         for i in range(0, len(resources), 2):
-            amount = float(resources[i].replace(',', ''))
-            resource = resources[i+1].lower()
+            try:
+                amount = float(resources[i].replace(',', ''))
+                resource = resources[i+1].lower()
+            except:
+                raise Exception("Invalid input, incorrect number of arguments supplied")
             val = amount * int(prices[resource]['avgprice'])
             total_value += val
             embed.add_field(name=f"{'{:,}'.format(amount)} {resource}", value=f"${'{:,}'.format(val)}")
