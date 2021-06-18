@@ -45,7 +45,7 @@ class Nations(commands.Cog):
 
     @commands.command()
     @commands.check(helpers.perms_nine)
-    async def warvis(self, ctx, alliance_ids):
+    async def warvisv2(self, ctx, alliance_ids):
         url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
         response = requests.get(url).json()
         if not response['api_request']['success']:
@@ -62,15 +62,15 @@ class Nations(commands.Cog):
                 f.write(entry)
         await ctx.send(file=discord.File('../warvis.csv'))
 
-    @warvis.error
-    async def warvis_error(self, ctx, error):
+    @warvisv2.error
+    async def warvisv2_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warvis <alliance_ids>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warvisv2 <alliance_ids>`")
 
 
     @commands.command()
     @commands.check(helpers.perms_nine)
-    async def warvisv3(self, ctx, alliance_ids):
+    async def warvis(self, ctx, alliance_ids):
         url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
         by_cities = lambda nation: nation['num_cities']
         nations = []
@@ -157,10 +157,10 @@ class Nations(commands.Cog):
                 f.write(entry)
         await ctx.send(file=discord.File('../warvis.csv'))
 
-    @warvisv3.error
-    async def warvisv3_error(self, ctx, error):
+    @warvis.error
+    async def warvis_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warvisv3`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warvis`")
 
 
     @commands.command()
