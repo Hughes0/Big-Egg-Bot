@@ -257,3 +257,36 @@ def rss_list_to_dict(resources):
         if resource not in resources_dict:
             resources_dict[resource] = 0
     return resources_dict
+
+
+def parse_keyword_args(args):
+    args_dict = {}
+    for arg in args:
+        if '=' not in arg:
+            raise Exception("Invalid input")
+        key_value = arg.split('=')
+        try:
+            value = int(value.replace(',', ''))
+            try:
+                value = float(value.replace(',', ''))
+            except:
+                value = key_value[1]
+        except:
+            value = key_value[1]
+        args_dict[key_value[0]] = value
+    return args_dict
+
+
+
+def alliance_id_to_name():
+    url = f"https://politicsandwar.com/api/alliances/?key={apikey()}"
+    response = requests.get(url).json()
+    alliances = response['alliances']
+    lookup_dict = {}
+    for alliance in alliances:
+        lookup_dict[str(alliance['id'])] = alliance['name']
+    return lookup_dict
+
+
+def paginate_list(array, per_chunk):
+    return [array[i:i+per_chunk] for i in range(0, len(array), per_chunk)]
