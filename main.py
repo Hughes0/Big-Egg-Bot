@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 intents = discord.Intents().all()
-bot = commands.Bot(command_prefix = "$", intents=intents)
+bot = commands.Bot(command_prefix = "d$", intents=intents)
 
 
 
@@ -96,6 +96,7 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_ready():
+    os.environ['API_URL'] = 'http://127.0.0.1:5000'
     print(f"{bot.user.name} is online")
     print("-----")
     # set bot activity to help command
