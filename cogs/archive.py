@@ -48,10 +48,16 @@ class Archive(commands.Cog):
 
     @commands.command()
     @commands.check(helpers.perms_one)
-    async def treaties_change(self, ctx, alliance_ids, start_date, end_date):
-        alliance_ids = alliance_ids.split(',')
+    async def treaties_change(self, ctx, start_date, end_date, alliance_ids=None):
         archive_api_url = os.getenv('API_URL')
-        parameters = '&'.join([f'alliance_id={id}' for id in alliance_ids])
+        id_to_name = helpers.alliance_id_to_name()
+        if alliance_ids:
+            alliance_ids = alliance_ids.split(',')
+            parameters = '&'.join([f'alliance_id={id}' for id in alliance_ids])
+            alliances = f"{', '.join([id_to_name[str(id)] for id in alliance_ids])}"
+        else:
+            parameters = ""
+            alliances = "All Alliances"
         url = f'{archive_api_url}/api/treaties?{parameters}&entry_date={start_date}'
         data = requests.get(url).json()
         start_treaties = helpers.remove_dates(data['treaties'], 'entry_date')
@@ -60,11 +66,10 @@ class Archive(commands.Cog):
         end_treaties = helpers.remove_dates(data['treaties'], 'entry_date')
         added = [treaty for treaty in end_treaties if treaty not in start_treaties]
         removed = [treaty for treaty in start_treaties if treaty not in end_treaties]
-        id_to_name = helpers.alliance_id_to_name()
         page = 1
         for sublist in helpers.paginate_list(added, 15):
             embed = discord.Embed(title=f"{len(added)} Treaties Added | Change", \
-                    description=f"{', '.join([id_to_name[str(id)] for id in alliance_ids])}")
+                    description=alliances)
             for treaty in sublist:
                 embed.add_field(name=f"{id_to_name[str(treaty['source'])]} to {id_to_name[str(treaty['target'])]}", value=f"{treaty['type']}")
             embed.set_footer(text=f"Page: {page}")
@@ -75,7 +80,7 @@ class Archive(commands.Cog):
         page = 1
         for sublist in helpers.paginate_list(removed, 15):
             embed = discord.Embed(title=f"{len(removed)} Treaties Removed | Change", \
-                    description=f"{', '.join([id_to_name[str(id)] for id in alliance_ids])}")
+                    description=alliances)
             for treaty in sublist:
                 embed.add_field(name=f"{id_to_name[str(treaty['source'])]} to {id_to_name[str(treaty['target'])]}", value=f"{treaty['type']}")
             embed.set_footer(text=f"Page: {page}")
@@ -149,8 +154,6 @@ class Archive(commands.Cog):
         resources = ['food', 'coal', 'oil', 'uranium', 'lead', 'iron', 'bauxite', 'gasoline', 'munitions', 'steel', 'aluminum']
         for resource in resources:
             embed.add_field(name=resource.capitalize(), value=f"Avg: {price_diff(start_avg, end_avg, resource)}\nSell: {price_diff(start_sell, end_sell, resource)}\nBuy: {price_diff(start_buy, end_buy, resource)}")
-
-        # embed.add_field(name="Food", value=f"Avg: {price_diff(start_avg, end_avg, 'food')}\nSell: {price_diff(start_sell, end_sell, 'food')}\nBuy: {price_diff(start_buy, end_buy, 'food')}")
         await ctx.send(embed=embed)
 
 
