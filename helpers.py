@@ -290,3 +290,11 @@ def alliance_id_to_name():
 
 def paginate_list(array, per_chunk):
     return [array[i:i+per_chunk] for i in range(0, len(array), per_chunk)]
+
+
+def remove_dates(array, date_key):
+    new_array = []
+    for obj in array:
+        obj.pop(date_key)
+        new_array.append(obj)
+    return new_array
