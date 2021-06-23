@@ -362,8 +362,6 @@ class Archive(commands.Cog):
                         Ships: {s_ships_percent} -> {e_ships_percent} **({e_ships_percent-s_ships_percent}%)**\n", inline=False)
         await ctx.send(embed=embed)
 
-
-
     @alliances_change.error
     async def alliances_change_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
