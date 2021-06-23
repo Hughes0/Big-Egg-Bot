@@ -297,7 +297,9 @@ Total Value: **${'{:,}'.format(entry[-1])}**
             # map v2 policy code to name
             domestic_policy = helpers.api_v2_dom_policy(nation['domestic_policy'])
             war_policy = helpers.api_v2_war_policy(nation['war_policy'])
-            embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}")
+            embed = discord.Embed(title=f"{nation['leader']} of {nation['nation']}", \
+                    description=f"[{nation['alliance']}](https://politicsandwar.com/alliance/id={nation['alliance_id']}) c{nation['cities']}", \
+                        url=f"https://politicsandwar.com/nation/id={nation['nation_id']}")
             embed.add_field(name=domestic_policy, value="Domestic Policy", inline=False)
             embed.add_field(name=war_policy, value="War Policy", inline=False)
             await ctx.send(embed=embed)
