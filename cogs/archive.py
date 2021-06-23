@@ -160,7 +160,57 @@ class Archive(commands.Cog):
     @prices_change.error
     async def prices_change_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}prices_change <argument=value>`")
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}prices_change <start_date> <end_date>`")
+
+
+    @commands.command(description="use: <nation | alliance>\np1/p2=<id>\np1_type/p2_type=<nation | alliance>\nmin_date/max_date=<yyyy-mm-dd/hh:mm:ss>")
+    @commands.check(helpers.perms_one)
+    async def stats(self, ctx, use, *args):
+        args = helpers.parse_keyword_args(args)
+        party_1 = args.get('p1')
+        party_1_type = args.get('p1_type')
+        party_2 = args.get('p2')
+        party_2_type = args.get('p2_type')
+        min_date = args.get('min_date')
+        max_date = args.get('max_date')
+        if not party_1 or not party_1_type:
+            raise Exception("p1 and p1_type are required arguments")
+        use = use.lower()
+        party_1 = party_1.split(",")
+        party_1_type = party_1_type.lower()
+        archive_api_url = os.getenv('API_URL')
+        parameters = '&'.join([f"party_1={entity}" for entity in party_1])
+        url = f"{archive_api_url}/api/stats/attacks?{parameters}&party_1_type={party_1_type}"
+        args = f"Party 1 {party_1_type}s: {', '.join(party_1)}"
+        if party_2 and party_2.lower() != "none":
+            party_2 = party_2.split(",")
+            party_2_type = party_2_type.lower()
+            parameters = '&'.join([f"party_2={entity}" for entity in party_2])
+            url += f"&{parameters}&party_2_type={party_2_type}"
+            args += f"\nParty 2 {party_2_type}s: {', '.join(party_2)}"
+        if min_date:
+            url += f"&min_date={min_date}"
+            args += f"\nMin date: {min_date.replace('/', ' ')}"
+        if max_date:
+            url += f"&max_date={max_date}"
+            args += f"\nMax date: {max_date.replace('/', ' ')}"
+        data = requests.get(url).json()
+        party_1_stats = data['party_1']
+        party_2_stats = data['party_2']
+        categories = [key for key in party_1_stats]
+        embed = discord.Embed(title=f"Stats | By {use.capitalize()}", description=args)
+        commas = lambda n: "{:,}".format(n)
+        for category in categories:
+            d = '$' if 'value' in category else ''
+            embed.add_field(name=category, value=f"P1 All: {d}{commas(party_1_stats[category])}\n\
+                    P2 All: {d}{commas(party_2_stats[category])}\n\
+                        P1 Net: {d}{commas(party_1_stats[category]-party_2_stats[category])}")
+        await ctx.send(embed=embed)
+        
+    @stats.error
+    async def stats_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}stats <use> <argument=value>`")
 
 
 def setup(bot):
