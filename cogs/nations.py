@@ -255,5 +255,33 @@ Total Value: **${'{:,}'.format(entry[-1])}**
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}resources <nation_id>`")
 
 
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def timers(self, ctx, alliance_ids, min_cities=0, max_cities=100):
+        key = helpers.apikey()
+        helpers.check_city_inputs(min_cities, max_cities)
+        url = f"https://politicsandwar.com/api/v2/nations/{key}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false&min_cities={min_cities}&max_cities={max_cities}"
+        response = requests.get(url).json()
+        nations = response['data']
+        for nation in nations:
+            url = f"https://politicsandwar.com/api/nation/id={nation['nation_id']}&key={key}"
+            nation_data = requests.get(url).json()
+            embed = discord.Embed(title=f"{nation_data['leadername']} of {nation_data['name']}", \
+                    description=f"[{nation_data['alliance']}](https://politicsandwar.com/alliance/id={nation_data['allianceid']}) c{nation_data['cities']}", \
+                        url=f"https://politicsandwar.com/nation/id={nation['nation_id']}")
+            embed.add_field(name=f"{max(120-nation_data['turns_since_last_city'],0)} turns", value="City Timer")
+            embed.add_field(name=f"{max(120-nation_data['turns_since_last_project'],0)} turns", value="Project Timer")
+            embed.set_footer(text=f"Policy: {nation_data['domestic_policy']}")
+            await ctx.send(embed=embed)
+
+
+    @timers.error
+    async def timers_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}timers <alliance_ids>`")
+
+
+
+
 def setup(bot):
     bot.add_cog(Nations(bot))
