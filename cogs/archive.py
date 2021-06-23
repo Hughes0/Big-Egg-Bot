@@ -213,5 +213,67 @@ class Archive(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}stats <use> <argument=value>`")
 
 
+    @commands.command()
+    @commands.check(helpers.perms_one)
+    async def alliances_entry(self, ctx, identifier, entry_date):
+        archive_api_url = os.getenv('API_URL')
+        url = f"{archive_api_url}/api/alliances"
+        try:
+            identifier = int(identifier)
+            identifier_type = 'id'
+        except:
+            identifier_type = 'name'
+        if identifier_type == "name":
+            url += f"?name={identifier}"
+        elif identifier_type == "id":
+            url += f"?id={identifier}"
+        url += f"&entry_date={entry_date}"
+        data = requests.get(url).json()
+        try:
+            alliance = data['alliances'][0]
+        except:
+            raise Exception("No entry found")
+        soldiers = alliance['soldiers']
+        tanks = alliance['tanks']
+        planes = alliance['planes']
+        ships = alliance['ships']
+        cities = alliance['cities']
+        max_soldiers = cities * 15000
+        max_tanks = cities * 1250
+        max_planes = cities * 75
+        max_ships = cities * 15
+        barracks = alliance['barracks']
+        factories = alliance['factories']
+        hangars = alliance['hangars']
+        drydocks = alliance['drydocks']
+        embed = discord.Embed(title=f"{alliance['name']} ({alliance['id']})", description=alliance['entry_date'])
+        c = helpers.commas
+        embed.add_field(name="Basic", value=f"{c(alliance['score'])} score\n{alliance['members']} members\n \
+                    {alliance['missiles']} missiles\n{alliance['nukes']} nukes")
+        embed.add_field(name="Avg Improvements", \
+                value=f"Barracks: {round(barracks/cities,2)}\n \
+                    Factories: {round(factories/cities,2)}\n \
+                        Hangars: {round(hangars/cities,2)}\n \
+                            Drydocks: {round(drydocks/cities,2)}", \
+                inline=False)
+        embed.add_field(name="Military (current / max)", \
+            value=f"Soldiers: {c(soldiers)} / {c(max_soldiers)}\n \
+                Tanks: {c(tanks)} / {c(max_tanks)}\n \
+                    Planes: {c(planes)} / {c(max_planes)}\n \
+                        Ships: {c(ships)} / {c(max_ships)}", \
+            inline=False)
+        embed.add_field(name="Military (%)", \
+            value=f"Soldiers: {round(soldiers/max_soldiers*100)}%\n \
+                Tanks: {round(tanks/max_tanks*100)}%\n \
+                    Planes: {round(planes/max_planes*100)}%\n \
+                        Ships: {round(ships/max_ships*100)}%", \
+            inline=False)
+        await ctx.send(embed=embed)
+
+    @alliances_entry.error
+    async def alliances_entry_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}alliances_entry <identifier> <entry_date:yyyy-mm-dd>`")
+
 def setup(bot):
     bot.add_cog(Archive(bot))
