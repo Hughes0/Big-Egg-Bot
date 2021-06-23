@@ -17,7 +17,7 @@ class Archive(commands.Cog):
         self.bot = bot    
 
     @commands.command()
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def treaties_overview(self, ctx, *args):
         args = helpers.parse_keyword_args(args)
         archive_api_url = os.getenv('API_URL')
@@ -47,7 +47,7 @@ class Archive(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def treaties_change(self, ctx, start_date, end_date, alliance_ids=None):
         archive_api_url = os.getenv('API_URL')
         id_to_name = helpers.alliance_id_to_name()
@@ -97,7 +97,7 @@ class Archive(commands.Cog):
 
     
     @commands.command()
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def prices_overview(self, ctx, *args):
         args = helpers.parse_keyword_args(args)
         archive_api_url = os.getenv('API_URL')
@@ -126,7 +126,7 @@ class Archive(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def prices_change(self, ctx, start_date, end_date):
         archive_api_url = os.getenv('API_URL')
         url = f'{archive_api_url}/api/prices?entry_date={start_date}'
@@ -164,7 +164,7 @@ class Archive(commands.Cog):
 
 
     @commands.command(description="use: <nation | alliance>\np1/p2=<id>\np1_type/p2_type=<nation | alliance>\nmin_date/max_date=<yyyy-mm-dd/hh:mm:ss>")
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def stats(self, ctx, use, *args):
         args = helpers.parse_keyword_args(args)
         party_1 = args.get('p1')
@@ -214,7 +214,7 @@ class Archive(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_one)
+    @commands.check(helpers.perms_six)
     async def alliances_entry(self, ctx, identifier, entry_date):
         archive_api_url = os.getenv('API_URL')
         url = f"{archive_api_url}/api/alliances"
@@ -248,8 +248,8 @@ class Archive(commands.Cog):
         drydocks = alliance['drydocks']
         embed = discord.Embed(title=f"{alliance['name']} ({alliance['id']})", description=alliance['entry_date'])
         c = helpers.commas
-        embed.add_field(name="Basic", value=f"{c(alliance['score'])} score\n{alliance['members']} members\n \
-                    {alliance['missiles']} missiles\n{alliance['nukes']} nukes")
+        embed.add_field(name="Basic", value=f"Score: {c(alliance['score'])}\nMembers: {alliance['members']}\n \
+                    Missiles: {alliance['missiles']}\nNukes: {alliance['nukes']}\nCities: {alliance['cities']}")
         embed.add_field(name="Avg Improvements", \
                 value=f"Barracks: {round(barracks/cities,2)}\n \
                     Factories: {round(factories/cities,2)}\n \
@@ -274,6 +274,101 @@ class Archive(commands.Cog):
     async def alliances_entry_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}alliances_entry <identifier> <entry_date:yyyy-mm-dd>`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def alliances_change(self, ctx, identifier, start_date, end_date):
+        archive_api_url = os.getenv('API_URL')
+        url = f"{archive_api_url}/api/alliances"
+        try:
+            identifier = int(identifier)
+            identifier_type = 'id'
+        except:
+            identifier_type = 'name'
+        if identifier_type == "name":
+            url += f"?name={identifier}"
+        elif identifier_type == "id":
+            url += f"?id={identifier}"
+        start_url = url + f"&entry_date={start_date}"
+        start_data = requests.get(start_url).json()
+        end_url = url + f"&entry_date={end_date}"
+        end_data = requests.get(end_url).json()
+        try:
+            start_entry = start_data['alliances'][0]
+            end_entry = end_data['alliances'][0]
+        except:
+            raise Exception("No entry found for one of the selected dates")
+        s_cities = start_entry['cities']
+        e_cities = end_entry['cities']
+        s_score = start_entry['score']
+        e_score = end_entry['score']
+        s_members = start_entry['members']
+        e_members = end_entry['members']
+        s_missiles = start_entry['missiles']
+        e_missiles = end_entry['missiles']
+        s_nukes = start_entry['nukes']
+        e_nukes = end_entry['nukes']
+        s_barracks = round(start_entry['barracks'] / s_cities, 2)
+        e_barracks = round(end_entry['barracks'] / e_cities, 2)
+        s_factories = round(start_entry['factories'] / s_cities, 2)
+        e_factories = round(end_entry['factories'] / e_cities, 2)
+        s_hangars = round(start_entry['hangars'] / s_cities, 2)
+        e_hangars = round(end_entry['hangars'] / e_cities, 2)
+        s_drydocks = round(start_entry['drydocks'] / s_cities, 2)
+        e_drydocks = round(end_entry['drydocks'] / e_cities, 2)
+        s_soldiers = start_entry['soldiers']
+        s_soldiers_max = s_cities * 15000
+        e_soldiers = end_entry['soldiers']
+        e_soldiers_max = e_cities * 15000
+        s_tanks = start_entry['tanks']
+        s_tanks_max = s_cities * 1250
+        e_tanks = end_entry['tanks']
+        e_tanks_max = e_cities * 1250
+        s_planes = start_entry['planes']
+        s_planes_max = s_cities * 75
+        e_planes = end_entry['planes']
+        e_planes_max = e_cities * 75
+        s_ships = start_entry['ships']
+        s_ships_max = s_cities * 15
+        e_ships = end_entry['ships']
+        e_ships_max = e_cities * 15
+        s_soldiers_percent = round(s_soldiers/s_soldiers_max*100)
+        e_soldiers_percent = round(e_soldiers/e_soldiers_max*100)
+        s_tanks_percent = round(s_tanks/s_tanks_max*100)
+        e_tanks_percent = round(e_tanks/e_tanks_max*100)
+        s_planes_percent = round(s_planes/s_planes_max*100)
+        e_planes_percent = round(e_planes/e_planes_max*100)
+        s_ships_percent = round(s_ships/s_ships_max*100)
+        e_ships_percent = round(e_ships/e_ships_max*100)
+        embed = discord.Embed(title=f"{end_entry['name']} ({end_entry['id']})", description=f"{start_entry['entry_date']} -> {end_entry['entry_date']}")
+        c = helpers.commas
+        embed.add_field(name="Basic", value=f"Score: {c(s_score)} -> {c(e_score)} **({c(round(e_score-s_score, 2))})**\n\
+                Members: {s_members} -> {e_members} **({e_members - s_members})**\n\
+                    Missiles: {s_missiles} -> {e_missiles} **({e_missiles - s_missiles})**\n\
+                        Nukes: {s_nukes} -> {e_nukes} **({e_nukes - s_nukes})**\n\
+                            Cities: {s_cities} -> {e_cities} **({e_cities - s_cities})**", inline=False)
+        embed.add_field(name="Avg Improvements", value=f"Barracks: {s_barracks} -> {e_barracks} **({round(e_barracks-s_barracks, 2)})**\n\
+                Factories: {s_factories} -> {e_factories} **({round(e_factories-s_factories, 2)})**\n\
+                    Hangars: {s_hangars} -> {e_hangars} **({round(e_hangars-s_hangars, 2)})**\n\
+                        Drydocks: {s_drydocks} -> {e_drydocks} **({round(e_drydocks-s_drydocks, 2)})**", inline=False)
+        embed.add_field(name="Military (raw)", value=f"Soldiers: {c(s_soldiers)} -> {c(e_soldiers)} **({c(e_soldiers - s_soldiers)})**\n\
+                Tanks: {c(s_tanks)} -> {c(e_tanks)} **({c(e_tanks - s_tanks)})**\n\
+                    Planes: {c(s_planes)} -> {c(e_planes)} **({c(e_planes - s_planes)})**\n\
+                        Ships: {c(s_ships)} -> {c(e_ships)} **({c(e_ships - s_ships)})**\n", inline=False)
+        embed.add_field(name="Military (%)", value=f"Soldiers: {s_soldiers_percent} -> {e_soldiers_percent} **({e_soldiers_percent-s_soldiers_percent}%)**\n\
+                Tanks: {s_tanks_percent} -> {e_tanks_percent} **({e_tanks_percent-s_tanks_percent}%)**\n\
+                    Planes: {s_planes_percent} -> {e_planes_percent} **({e_planes_percent-s_planes_percent}%)**\n\
+                        Ships: {s_ships_percent} -> {e_ships_percent} **({e_ships_percent-s_ships_percent}%)**\n", inline=False)
+        await ctx.send(embed=embed)
+
+
+
+    @alliances_change.error
+    async def alliances_change_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}alliances_change <identifier> <start_date:yyyy-mm-dd> <end_date:yyyy-mm-dd>`")
+
 
 def setup(bot):
     bot.add_cog(Archive(bot))
