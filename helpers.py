@@ -298,3 +298,6 @@ def remove_dates(array, date_key):
         obj.pop(date_key)
         new_array.append(obj)
     return new_array
+
+
+commas = lambda n: "{:,}".format(n)
