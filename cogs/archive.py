@@ -184,7 +184,7 @@ class Archive(commands.Cog):
         party_1_type = party_1_type.lower()
         archive_api_url = os.getenv('API_URL')
         parameters = '&'.join([f"party_1={entity}" for entity in party_1])
-        url = f"{archive_api_url}/api/stats/attacks?{parameters}&party_1_type={party_1_type}"
+        url = f"{archive_api_url}/api/stats/{use}?{parameters}&party_1_type={party_1_type}"
         args = f"Party 1 {party_1_type}s: {', '.join(party_1)}"
         if party_2 and party_2.lower() != "none":
             party_2 = party_2.split(",")
@@ -202,7 +202,7 @@ class Archive(commands.Cog):
         party_1_stats = data['party_1']
         party_2_stats = data['party_2']
         categories = [key for key in party_1_stats]
-        embed = discord.Embed(title=f"Stats | By {use.capitalize()}", description=args)
+        embed = discord.Embed(title=f"Stats | By {use.capitalize()} ({len(data['attacks'])} {use})", description=args)
         commas = lambda n: "{:,}".format(n)
         for category in categories:
             d = '$' if 'value' in category else ''
