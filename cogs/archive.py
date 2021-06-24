@@ -109,6 +109,8 @@ class Archive(commands.Cog):
             arg: args[arg] for arg in args if args[arg] is not None
         }
         prices = data['prices']
+        if not prices:
+            raise Exception("No entries found")
         page = 1
         for sublist in helpers.paginate_list(prices, 15):
             embed = discord.Embed(title=f"{len(prices)} Price Entries | Oveview", description=f"{detected_args}")
@@ -135,6 +137,8 @@ class Archive(commands.Cog):
         url = f'{archive_api_url}/api/prices?entry_date={end_date}'
         data = requests.get(url).json()
         end_prices = helpers.remove_dates(data['prices'], 'entry_date')
+        if not start_prices or not end_prices:
+            raise Exception("No price entries found for either start or end date")
         def format(prices, key):
             formatted_dict = {}
             for entry in prices:
