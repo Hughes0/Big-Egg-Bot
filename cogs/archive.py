@@ -180,6 +180,12 @@ class Archive(commands.Cog):
         if not party_1 or not party_1_type:
             raise Exception("p1 and p1_type are required arguments")
         use = use.lower()
+        if use == "wars":
+            datetime_type = "start_date"
+        elif use == "attacks":
+            datetime_type = "date_time"
+        else:
+            raise Exception("Invalid type for use, try 'attacks' or 'wars'")
         party_1 = party_1.split(",")
         party_1_type = party_1_type.lower()
         archive_api_url = os.getenv('API_URL')
@@ -199,16 +205,55 @@ class Archive(commands.Cog):
             url += f"&max_date={max_date}"
             args += f"\nMax date: {max_date.replace('/', ' ')}"
         data = requests.get(url).json()
-        party_1_stats = data['party_1']
-        party_2_stats = data['party_2']
-        categories = [key for key in party_1_stats]
+        if not data['attacks']:
+            raise Exception(f"No {use} found")
+        p1_stats = data['party_1']
+        p2_stats = data['party_2']
+        to_datetime_obj = lambda string: datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
+        actual_min_datetime = min([entry[datetime_type] for entry in data['attacks']], key=to_datetime_obj)
+        actual_max_datetime = max([entry[datetime_type] for entry in data['attacks']], key=to_datetime_obj)
         embed = discord.Embed(title=f"Stats | By {use.capitalize()} ({len(data['attacks'])} {use})", description=args)
-        commas = lambda n: "{:,}".format(n)
-        for category in categories:
-            d = '$' if 'value' in category else ''
-            embed.add_field(name=category, value=f"P1 All: {d}{commas(party_1_stats[category])}\n\
-                    P2 All: {d}{commas(party_2_stats[category])}\n\
-                        P1 Net: {d}{commas(party_1_stats[category]-party_2_stats[category])}")
+        c = helpers.commas
+        embed.add_field(name="Total Dealt", value=f"P1 All: **${c(p1_stats['total_dealt'])}**\n\
+                P2 All: **${c(p2_stats['total_dealt'])}**\n\
+                    P1 Net: **${c(p1_stats['total_dealt']-p2_stats['total_dealt'])}**")
+        embed.add_field(name="Soldiers Killed", value=f"P1 All: {c(p2_stats['soldiers_lost'])} **(${c(p2_stats['soldiers_lost_value'])})**\n\
+                P2 All: {c(p1_stats['soldiers_lost'])} **(${c(p1_stats['soldiers_lost_value'])})**\n\
+                    P1 Net: {c(p2_stats['soldiers_lost']-p1_stats['soldiers_lost'])} **(${c(p2_stats['soldiers_lost_value']-p1_stats['soldiers_lost_value'])})**")
+        embed.add_field(name="Tanks Destroyed", value=f"P1 All: {c(p2_stats['tanks_lost'])} **(${c(p2_stats['tanks_lost_value'])})**\n\
+                P2 All: {c(p1_stats['tanks_lost'])} **(${c(p1_stats['tanks_lost_value'])})**\n\
+                    P1 Net: {c(p2_stats['tanks_lost']-p1_stats['tanks_lost'])} **(${c(p2_stats['tanks_lost_value']-p1_stats['tanks_lost_value'])})**")
+        embed.add_field(name="Planes Destroyed", value=f"P1 All: {c(p2_stats['planes_lost'])} **(${c(p2_stats['planes_lost_value'])})**\n\
+                P2 All: {c(p1_stats['planes_lost'])} **(${c(p1_stats['planes_lost_value'])})**\n\
+                    P1 Net: {c(p2_stats['planes_lost']-p1_stats['planes_lost'])} **(${c(p2_stats['planes_lost_value']-p1_stats['planes_lost_value'])})**")
+        embed.add_field(name="Ships Destroyed", value=f"P1 All: {c(p2_stats['ships_lost'])} **(${c(p2_stats['ships_lost_value'])})**\n\
+                P2 All: {c(p1_stats['ships_lost'])} **(${c(p1_stats['ships_lost_value'])})**\n\
+                    P1 Net: {c(p2_stats['ships_lost']-p1_stats['ships_lost'])} **(${c(p2_stats['ships_lost_value']-p1_stats['ships_lost_value'])})**")
+        embed.add_field(name="Enemy Missiles Used", value=f"P1 All: {c(p2_stats['missiles_used'])} **(${c(p2_stats['missiles_used_value'])})**\n\
+                P2 All: {c(p1_stats['missiles_used'])} **(${c(p1_stats['missiles_used_value'])})**\n\
+                    P1 Net: {c(p2_stats['missiles_used']-p1_stats['missiles_used'])} **(${c(p2_stats['missiles_used_value']-p1_stats['missiles_used_value'])})**")
+        embed.add_field(name="Enemy Nukes Used", value=f"P1 All: {c(p2_stats['nukes_used'])} **(${c(p2_stats['nukes_used_value'])})**\n\
+                P2 All: {c(p1_stats['nukes_used'])} **(${c(p1_stats['nukes_used_value'])})**\n\
+                    P1 Net: {c(p2_stats['nukes_used']-p1_stats['nukes_used'])} **(${c(p2_stats['nukes_used_value']-p1_stats['nukes_used_value'])})**")
+        embed.add_field(name="Infra Destroyed", value=f"P1 All: {c(p1_stats['infra_destroyed'])} **(${c(p1_stats['infra_destroyed_value'])})**\n\
+                P2 All: {c(p2_stats['infra_destroyed'])} **(${c(p2_stats['infra_destroyed_value'])})**\n\
+                    P1 Net: {c(p1_stats['infra_destroyed']-p2_stats['infra_destroyed'])} **(${c(p1_stats['infra_destroyed_value']-p2_stats['infra_destroyed_value'])})**")
+        embed.add_field(name="Money Destroyed", value=f"P1 All: ${c(p1_stats['money_destroyed'])}\n\
+                P2 All: ${c(p2_stats['money_destroyed'])}\n\
+                    P1 Net: ${c(p1_stats['money_destroyed']-p2_stats['money_destroyed'])}")
+        embed.add_field(name="Money Looted", value=f"P1 All: ${c(p1_stats['money_looted'])}\n\
+                P2 All: ${c(p2_stats['money_looted'])}\n\
+                    P1 Net: ${c(p1_stats['money_looted']-p2_stats['money_looted'])}")
+        embed.add_field(name="Resource Loot Value", value=f"P1 All: ${c(p1_stats['resource_loot_value'])}\n\
+                P2 All: ${c(p2_stats['resource_loot_value'])}\n\
+                    P1 Net: ${c(p1_stats['resource_loot_value']-p2_stats['resource_loot_value'])}")
+        embed.add_field(name="Gas Usage Inflicted", value=f"P1 All: {c(p2_stats['gas_used'])} **(${c(p2_stats['gas_used_value'])})**\n\
+                P2 All: {c(p1_stats['gas_used'])} **(${c(p1_stats['gas_used_value'])})**\n\
+                    P1 Net: {c(p2_stats['gas_used']-p1_stats['gas_used'])} **(${c(p2_stats['gas_used_value']-p1_stats['gas_used_value'])})**")
+        embed.add_field(name="Muni Usage Inflicted", value=f"P1 All: {c(p2_stats['muni_used'])} **(${c(p2_stats['muni_used_value'])})**\n\
+                P2 All: {c(p1_stats['muni_used'])} **(${c(p1_stats['muni_used_value'])})**\n\
+                    P1 Net: {c(p2_stats['muni_used']-p1_stats['muni_used'])} **(${c(p2_stats['muni_used_value']-p1_stats['muni_used_value'])})**")
+        embed.set_footer(text=f"Actual {datetime_type} range: {actual_min_datetime} to {actual_max_datetime}")
         await ctx.send(embed=embed)
         
     @stats.error
