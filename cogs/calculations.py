@@ -41,13 +41,14 @@ def battle_odds(att_value, def_value):
     return immense, moderate, pyrrhic, failure, color
 
 
-def city_income(city_id):
+def city_income(city_id, nation_data=None):
     url = f"https://politicsandwar.com/api/city/id={city_id}&key={helpers.apikey()}"
     city_data = requests.get(url).json()
     if "error" in city_data:
         raise Exception(city_data['error'])
-    url = f"https://politicsandwar.com/api/nation/id={city_data['nationid']}&key={helpers.apikey()}"
-    nation_data = requests.get(url).json()
+    if not nation_data:
+        url = f"https://politicsandwar.com/api/nation/id={city_data['nationid']}&key={helpers.apikey()}"
+        nation_data = requests.get(url).json()
     # initialize total income variables
     gross_cash = 0
     upkeep = 0
@@ -199,9 +200,55 @@ def city_income(city_id):
     net_aluminum += production(aluminum_refineries, 5, base_prod)
     net_bauxite -= production(aluminum_refineries, 5, base_usage)
     upkeep += 2500 * aluminum_refineries
-    return gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
-            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum, city_data, nation_data
+    return (gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
+            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum), city_data
 
+
+def nation_income_all_cities(nation_id):
+    url = f"https://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()}"
+    nation_data = requests.get(url).json()
+    url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
+    query = "query{colors{color, turn_bonus}}"
+    color_blocs = requests.post(url,json={'query':query}).json()['data']['colors']
+    color_bonus = lambda color: [bloc['turn_bonus'] for bloc in color_blocs if bloc['color']==color][0]*12
+    city_ids = nation_data['cityids']
+    add_tuples = lambda t1, t2: tuple(map(lambda i, j: i + j, t1, t2))
+    city_incomes = [city_income(city_id)[0] for city_id in city_ids]
+    def add_city_incomes(city_incomes):
+        c1 = city_incomes.pop(0)
+        c2 = city_incomes[0]
+        city_incomes[0] = add_tuples(c1, c2)
+        if len(city_incomes) > 1:
+            return add_city_incomes(city_incomes)
+        else:
+            return city_incomes[0]
+    total_income = add_city_incomes(city_incomes)
+    soldiers = int(nation_data['soldiers'])
+    tanks = int(nation_data['tanks'])
+    planes = int(nation_data['aircraft'])
+    ships = int(nation_data['ships'])
+    missiles = int(nation_data['missiles'])
+    nukes = int(nation_data['nukes'])
+    military_upkeep = 0
+    if nation_data['offensivewar_ids'] or nation_data['defensivewar_ids']: # case in war
+        military_upkeep += soldiers * 1.88
+        military_upkeep += tanks * 75
+        military_upkeep += planes * 750
+        military_upkeep += ships * 5625
+        military_upkeep += missiles * 31500
+        military_upkeep += nukes * 52500
+    else: # case not in war
+        military_upkeep += soldiers * 1.25
+        military_upkeep += tanks * 50
+        military_upkeep += planes * 500
+        military_upkeep += ships * 3750
+        military_upkeep += missiles * 21000
+        military_upkeep += nukes * 35000
+    # spies?
+    total_income = list(total_income)
+    total_income[1] += military_upkeep
+    total_income[0] += color_bonus(nation_data['color'])
+    return tuple(total_income), nation_data
 
 
 
@@ -502,11 +549,12 @@ class Calculations(commands.Cog):
             city_id = int(city_id)
         except:
             raise Exception("Invalid input")
+        income_data, city_data = city_income(city_id)
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
-            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum, city_data, nation_data = city_income(city_id)
+            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
         prices = helpers.cached_prices()
         total_dnr = 0
-        commas = lambda n: '{:,}'.format(n)
+        commas = helpers.commas
         embed = discord.Embed(title=f"placeholder", url=city_data['url'], \
                 description=f"Nation: [{city_data['nation']}](https://politicsandwar.com/nation/id={city_data['nationid']})", \
                 color=ctx.author.color)
@@ -576,7 +624,80 @@ class Calculations(commands.Cog):
 
     @income.command()
     async def nation(self, ctx, nation_id):
-        return
+        income_data, nation_data = nation_income_all_cities(nation_id)
+        gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
+            net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
+        prices = helpers.cached_prices()
+        total_dnr = 0
+        commas = helpers.commas
+        embed = discord.Embed(title=f"placeholder", url=f"https://politicsandwar.com/nation/id={nation_data['nationid']}", \
+                description=f"Alliance: [{nation_data['alliance']}](https://politicsandwar.com/nation/id={nation_data['allianceid']})", \
+                color=ctx.author.color)
+        cities = nation_data['cities']
+        total_dnr += gross_cash - upkeep
+        embed.add_field(name="Cash", \
+                value=f"${commas(round(gross_cash - upkeep,2))}", \
+                inline=True)
+        food_value = round((food_production-food_consumption), 2) * int(prices['food']['avg_price'])
+        total_dnr += food_value
+        embed.add_field(name="Food", \
+                value=f"{round(food_production-food_consumption,2)}\n\
+                (`${commas(food_value)}`)", \
+                inline=True)
+        coal_value = round(net_coal * int(prices['coal']['avg_price']), 2)
+        total_dnr += coal_value
+        embed.add_field(name="Coal", \
+                value=f"{round(net_coal, 2)}\n(`${commas(coal_value)}`)", \
+                inline=True)
+        oil_value = round(net_oil * int(prices['oil']['avg_price']), 2)
+        total_dnr += oil_value
+        embed.add_field(name="Oil", \
+                value=f"{round(net_oil, 2)}\n(`${commas(oil_value)}`)", \
+                inline=True)
+        uranium_value = round(net_uranium * int(prices['uranium']['avg_price']), 2)
+        total_dnr += uranium_value
+        embed.add_field(name="Uranium", \
+                value=f"{round(net_uranium, 2)}\n(`${commas(uranium_value)}`)", \
+                inline=True)
+        lead_value = round(net_lead * int(prices['lead']['avg_price']), 2)
+        total_dnr += lead_value
+        embed.add_field(name="Lead", \
+                value=f"{round(net_lead, 2)}\n(`${commas(lead_value)}`)", \
+                inline=True)
+        iron_value = round(net_iron * int(prices['iron']['avg_price']), 2)
+        total_dnr += iron_value
+        embed.add_field(name="Iron", \
+                value=f"{round(net_iron, 2)}\n(`${commas(iron_value)}`)", \
+                inline=True)
+        bauxite_value = round(net_bauxite * int(prices['bauxite']['avg_price']), 2)
+        total_dnr += bauxite_value
+        embed.add_field(name="Bauxite", \
+                value=f"{round(net_bauxite, 2)}\n(`${commas(bauxite_value)}`)", \
+                inline=True)
+        gasoline_value = round(net_gasoline * int(prices['gasoline']['avg_price']), 2)
+        total_dnr += gasoline_value
+        embed.add_field(name="Gasoline", \
+                value=f"{round(net_gasoline, 2)}\n(`${commas(gasoline_value)}`)", \
+                inline=True)
+        munitions_value = round(net_munitions * int(prices['munitions']['avg_price']), 2)
+        total_dnr += munitions_value
+        embed.add_field(name="Munitions", \
+                value=f"{round(net_munitions, 2)}\n(`${commas(munitions_value)}`)", \
+                inline=True)
+        steel_value = round(net_steel * int(prices['steel']['avg_price']), 2)
+        total_dnr += steel_value
+        embed.add_field(name="Steel", \
+                value=f"{round(net_steel, 2)}\n(`${commas(steel_value)}`)", \
+                inline=True)
+        aluminum_value = round(net_aluminum * int(prices['aluminum']['avg_price']), 2)
+        total_dnr += aluminum_value
+        embed.add_field(name="Aluminum", \
+                value=f"{round(net_aluminum, 2)}\n(`${commas(aluminum_value)}`)", \
+                inline=True)
+        embed.title = f"DNR for the nation of {nation_data['name']}: ${commas(round(total_dnr, 2))}"
+        embed.set_footer(text=f"{cities} Cities | {round(nation_data['totalinfrastructure']/cities,2)} Avg Infra | {round(nation_data['landarea']/cities,2)} Avg Land")
+        await ctx.send(embed=embed)
+
 
     @income.command()
     async def alliance(self, ctx, alliance_id):
