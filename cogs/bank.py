@@ -78,13 +78,20 @@ class Bank(commands.Cog):
 
     @account.command()
     @commands.check(helpers.perms_ten)
-    async def get(self, ctx, account_name):
-        bank = account_amount(account_name)
-        await ctx.send(bank[0])
-        text = ""
-        for resource in bank[1]:
-            text += f"{resource}: {bank[1][resource]}\n"
-        await ctx.send(text)
+    async def get(self, ctx, account_name=None):
+        if not account_name:
+            query = "SELECT owner_discord_id, owner_name, owner_nation_id FROM accounts"
+            result = helpers.read_query('databases/accounts.sqlite', query)
+            for entry in result:
+                await ctx.send(f"**{entry[1]}** (<@!{entry[0]}>) - https://politicsandwar.com/nation/id={entry[2]}")
+            await ctx.send("All accounts displayed")
+        else:
+            bank = account_amount(account_name)
+            await ctx.send(bank[0])
+            text = ""
+            for resource in bank[1]:
+                text += f"{resource}: {bank[1][resource]}\n"
+            await ctx.send(text)
     
     @account.command()
     async def me(self, ctx):
@@ -95,7 +102,8 @@ class Bank(commands.Cog):
         text = ""
         for resource in bank[1]:
             text += f"{resource}: {bank[1][resource]}\n"
-        await ctx.send(text)
+        await ctx.author.send(text)
+        await ctx.send("DM sent")
     
     @account.command()
     @commands.check(helpers.perms_ten)
@@ -126,9 +134,9 @@ class Bank(commands.Cog):
         await ctx.send(f"Account for `{account_name}` removed")
 
     @account.command('withdraw')
-    async def account_withdraw(self, ctx, bank_alliance_id, *resources):
-        query = "SELECT owner_name FROM accounts WHERE owner_discord_id = ?"
-        account_name = helpers.read_query('databases/accounts.sqlite', query, (ctx.author.id,))
+    async def account_withdraw(self, ctx, account_name, bank_alliance_id, *resources):
+        query = "SELECT owner_name FROM accounts WHERE owner_name = ?"
+        account_name = helpers.read_query('databases/accounts.sqlite', query, (account_name,))
         if not account_name:
             raise Exception("Account not found")
         account_name = account_name[0][0]
@@ -141,15 +149,43 @@ class Bank(commands.Cog):
                 raise Exception(f"Too much {resource} selected")
         url = f"https://politicsandwar.com/api/nation/id={owner_nation_id}&key={helpers.apikey()}"
         data = requests.get(url).json()
-        alliance_name = data['alliance']
+        nation_name = data['name']
         helpers.catch_api_error(data, version=1)
         # result = withdraw(bank_alliance_id, "Nation", "Farmtopia", *resources)
         new_account_bank = {resource:account_bank[resource] for resource in account_bank}
         for resource in to_withdraw:
             new_account_bank[resource] -= to_withdraw[resource]
         update_account(owner_name, new_account_bank)
-        await ctx.send(f"Sent `{to_withdraw}` to alliance `{alliance_name}` from `{owner_name}`'s account")
-        await ctx.send(f"New balance: {account_amount(owner_name)}")
+        await ctx.send(f"Sent `{to_withdraw}` to nation `{nation_name}` from `{owner_name}`'s account")
+        new_amounts = account_amount(owner_name)
+        await ctx.send(new_amounts[0])
+        new_amounts = new_amounts[1]
+        text = ""
+        for resource in new_amounts:
+            text += f"{resource}: {new_amounts[resource]}\n"
+        await ctx.send(text)
+
+    @account.command()
+    @commands.check(helpers.perms_ten)
+    async def add(self, ctx, account_name, *resources):
+        resources_dict = helpers.rss_list_to_dict(resources)
+        query = "SELECT * FROM accounts WHERE owner_name = ?"
+        current_amounts = helpers.read_query('databases/accounts.sqlite', query, (account_name,))
+        if not current_amounts:
+            raise Exception("Account not found")
+        resources = ["cash", "food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]
+        current_amounts = current_amounts[0][3:]
+        amounts = {resources[i]:current_amounts[i] for i in range(len(resources))}
+        for resource in amounts:
+            amounts[resource] += resources_dict[resource]
+        update_account(account_name, amounts)
+        new_amounts = account_amount(account_name)
+        await ctx.send(new_amounts[0])
+        new_amounts = new_amounts[1]
+        text = ""
+        for resource in new_amounts:
+            text += f"{resource}: {new_amounts[resource]}\n"
+        await ctx.send(text)
 
     @account.error
     async def account_error(self, ctx, error):
