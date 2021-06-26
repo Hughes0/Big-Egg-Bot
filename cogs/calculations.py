@@ -631,7 +631,7 @@ class Calculations(commands.Cog):
         total_dnr = 0
         commas = helpers.commas
         embed = discord.Embed(title=f"placeholder", url=f"https://politicsandwar.com/nation/id={nation_data['nationid']}", \
-                description=f"Alliance: [{nation_data['alliance']}](https://politicsandwar.com/nation/id={nation_data['allianceid']})", \
+                description=f"Alliance: [{nation_data['alliance']}](https://politicsandwar.com/alliance/id={nation_data['allianceid']})", \
                 color=ctx.author.color)
         cities = nation_data['cities']
         total_dnr += gross_cash - upkeep
