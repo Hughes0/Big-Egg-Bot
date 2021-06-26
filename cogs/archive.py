@@ -29,13 +29,18 @@ class Archive(commands.Cog):
             arg: args[arg] for arg in args if args[arg] is not None
         }
         treaties = data['treaties']
+        if not treaties:
+            raise Exception("No treaty entries found")
         id_to_name = helpers.alliance_id_to_name()
         page = 1
-        for sublist in helpers.paginate_list(treaties, 15):
-            embed = discord.Embed(title=f"{len(treaties)} Treaties | Overview", description=f"{detected_args}")
+        pages = helpers.paginate_list(treaties, 15)
+        num_pages = len(pages)
+        for sublist in pages:
+            arguments = '\n'.join([f'{arg}: {detected_args[arg]}' for arg in detected_args])
+            embed = discord.Embed(title=f"{len(treaties)} Treaties | Overview", description=f"{arguments}")
             for treaty in sublist:
                 embed.add_field(name=f"{id_to_name[str(treaty['source'])]} to {id_to_name[str(treaty['target'])]}", value=f"{treaty['type']} on {treaty['entry_date']}")
-            embed.set_footer(text=f"Page: {page}")
+            embed.set_footer(text=f"Page: {page} / {num_pages}")
             page += 1
             await ctx.send(embed=embed)
 
@@ -61,9 +66,13 @@ class Archive(commands.Cog):
         url = f'{archive_api_url}/api/treaties?{parameters}&entry_date={start_date}'
         data = requests.get(url).json()
         start_treaties = helpers.remove_dates(data['treaties'], 'entry_date')
+        if not start_treaties:
+            raise Exception("No treaty entries for the selected start date found")
         url = f'{archive_api_url}/api/treaties?{parameters}&entry_date={end_date}'
         data = requests.get(url).json()
         end_treaties = helpers.remove_dates(data['treaties'], 'entry_date')
+        if not end_treaties:
+            raise Exception("No treaty entries for the selected end date found")
         added = [treaty for treaty in end_treaties if treaty not in start_treaties]
         removed = [treaty for treaty in start_treaties if treaty not in end_treaties]
         page = 1
