@@ -281,7 +281,7 @@ Total Value: **${'{:,}'.format(entry[-1])}**
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}timers <alliance_ids>`")
 
 
-    @commands.command()
+    @commands.command(aliases=["timers2"])
     @commands.check(helpers.perms_six)
     async def uglytimers(self, ctx, alliance_ids, min_cities=0, max_cities=100):
         key = helpers.apikey()
