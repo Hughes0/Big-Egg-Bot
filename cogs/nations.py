@@ -283,6 +283,30 @@ Total Value: **${'{:,}'.format(entry[-1])}**
 
     @commands.command()
     @commands.check(helpers.perms_six)
+    async def uglytimers(self, ctx, alliance_ids, min_cities=0, max_cities=100):
+        key = helpers.apikey()
+        helpers.check_city_inputs(min_cities, max_cities)
+        url = f"https://politicsandwar.com/api/v2/nations/{key}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false&min_cities={min_cities}&max_cities={max_cities}"
+        response = requests.get(url).json()
+        nations = response['data']
+        for nation in nations:
+            url = f"https://politicsandwar.com/api/nation/id={nation['nation_id']}&key={key}"
+            nation_data = requests.get(url).json()
+            msg = f"""```
+{nation_data['leadername']} of {nation_data['name']} (c{nation_data['cities']})
+{max(120-nation_data['turns_since_last_city'],0)} city timer turns
+{max(120-nation_data['turns_since_last_project'],0)} project timer turns```"""
+            await ctx.send(msg)
+
+
+    @uglytimers.error
+    async def uglytimers_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}uglytimers <alliance_ids>`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_six)
     async def policies(self, ctx, alliance_id, min_cities=0, max_cities=100):
         try:
             alliance_id = int(alliance_id)
