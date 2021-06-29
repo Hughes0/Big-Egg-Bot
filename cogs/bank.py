@@ -77,7 +77,7 @@ class Bank(commands.Cog):
             raise Exception("Invalid action")
 
     @account.command()
-    @commands.check(helpers.perms_ten)
+    @commands.check(helpers.perms_nine)
     async def get(self, ctx, account_name=None):
         if not account_name:
             query = "SELECT owner_discord_id, owner_name, owner_nation_id FROM accounts"
@@ -106,7 +106,7 @@ class Bank(commands.Cog):
         await ctx.send("DM sent")
     
     @account.command()
-    @commands.check(helpers.perms_ten)
+    @commands.check(helpers.perms_nine)
     async def create(self, ctx, account_name, owner_discord_id, owner_nation_id):
         query = """
             INSERT INTO accounts
@@ -120,14 +120,14 @@ class Bank(commands.Cog):
         await ctx.send(f"Account `{account_name}` created, linked to discord id `{owner_discord_id}` and nation id `{owner_nation_id}`")
 
     @account.command()
-    @commands.check(helpers.perms_ten)
+    @commands.check(helpers.perms_nine)
     async def update(self, ctx, account_name, *resources):
         resources_dict = helpers.rss_list_to_dict(resources)
         update_account(account_name, resources_dict)
         await ctx.send(account_amount(account_name))
 
     @account.command()
-    @commands.check(helpers.perms_ten)
+    @commands.check(helpers.perms_nine)
     async def delete(self, ctx, account_name):
         query = "DELETE FROM accounts WHERE owner_name = ?"
         helpers.execute_query('databases/accounts.sqlite', query, (account_name,))
@@ -166,7 +166,7 @@ class Bank(commands.Cog):
         await ctx.send(text)
 
     @account.command()
-    @commands.check(helpers.perms_ten)
+    @commands.check(helpers.perms_nine)
     async def add(self, ctx, account_name, *resources):
         resources_dict = helpers.rss_list_to_dict(resources)
         query = "SELECT * FROM accounts WHERE owner_name = ?"
