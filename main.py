@@ -137,20 +137,21 @@ async def on_ready():
             owner_discord_id INTEGER PRIMARY KEY,
             owner_name TEXT,
             owner_nation_id TEXT,
-            cash REAL,
-            food REAL,
-            coal REAL,
-            oil REAL,
-            uranium REAL,
-            lead REAL,
-            iron REAL,
-            bauxite REAL,
-            gasoline REAL,
-            munitions REAL,
-            steel REAL,
-            aluminum REAL
+            cash REAL DEFAULT 0,
+            food REAL DEFAULT 0,
+            coal REAL DEFAULT 0,
+            oil REAL DEFAULT 0,
+            uranium REAL DEFAULT 0,
+            lead REAL DEFAULT 0,
+            iron REAL DEFAULT 0,
+            bauxite REAL DEFAULT 0,
+            gasoline REAL DEFAULT 0,
+            munitions REAL DEFAULT 0,
+            steel REAL DEFAULT 0,
+            aluminum REAL DEFAULT 0
         );
     """
+    # create_accounts_table = "DROP TABLE accounts"
     helpers.execute_query('databases/accounts.sqlite', create_accounts_table)
     create_prices_table = """
         CREATE TABLE IF NOT EXISTS prices (

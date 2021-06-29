@@ -176,7 +176,9 @@ class Bank(commands.Cog):
             raise Exception("Account not found")
         resources = ["cash", "food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]
         current_amounts = current_amounts[0][3:]
+        print(current_amounts)
         amounts = {resources[i]:current_amounts[i] for i in range(len(resources))}
+        print(amounts)
         for resource in amounts:
             amounts[resource] += resources_dict[resource]
         update_account(account_name, amounts)
