@@ -300,4 +300,23 @@ def remove_dates(array, date_key):
     return new_array
 
 
+def resource_emojis():
+    emojis = {
+        "cash": ":dollar:",
+        "money": ":dollar:",
+        "food": "<:pnw_food:751243890610143323>",
+        "coal": "<:pnw_coal:751243890782240839>",
+        "oil": "<:pnw_oil:751243890513805383>",
+        "uranium": "<:pnw_uranium:751243890949881896>",
+        "lead": "<:pnw_lead:751243891012796616>",
+        "iron": "<:pnw_iron:751243890954207342>",
+        "bauxite": "<:pnw_bauxite:751243891029573683>",
+        "gasoline": "<:pnw_gasoline:751243890710937691>",
+        "munitions": "<:pnw_munitions:751243890895356034>",
+        "steel": "<:pnw_steel:751243890761269331>",
+        "aluminum": "<:pnw_aluminum:751243890962595901>"
+    }
+    return emojis
+
+
 commas = lambda n: "{:,}".format(n)

@@ -52,7 +52,7 @@ def withdraw(sender_alliance_id, withdraw_type, recipient, *resources):
     return withdraw_data
 
 
-def update_account(account_name, resources_dict):
+def set_account(account_name, resources_dict):
     entries = ",\n".join([f"{resource} = ?" for resource in resources_dict])
     query = f"""
         UPDATE accounts
@@ -62,6 +62,15 @@ def update_account(account_name, resources_dict):
     arguments = [resources_dict[resource] for resource in resources_dict]
     arguments.append(account_name)
     helpers.execute_query('databases/accounts.sqlite', query, tuple(arguments))
+
+
+def account_embed(owner_discord_id, owner_name, owner_nation_id, resources):
+    emojis = helpers.resource_emojis()
+    c = helpers.commas
+    embed = discord.Embed(title=f"{owner_name}", description=f"<@!{owner_discord_id}>\nhttps://politicsandwar.com/nation/id={owner_nation_id}")
+    for resource in resources:
+        embed.add_field(name=f"{c(resources[resource])} {emojis[resource]}", value=f"{resource.capitalize()}")
+    return embed
 
 
 class Bank(commands.Cog):
@@ -87,22 +96,18 @@ class Bank(commands.Cog):
             await ctx.send("All accounts displayed")
         else:
             bank = account_amount(account_name)
-            await ctx.send(bank[0])
-            text = ""
-            for resource in bank[1]:
-                text += f"{resource}: {bank[1][resource]}\n"
-            await ctx.send(text)
+            embed = account_embed(bank[0][0], bank[0][1], bank[0][2], bank[1])
+            embed.set_footer(text="Current Account Balance")
+            await ctx.send(embed=embed)
     
     @account.command()
     async def me(self, ctx):
         query = "SELECT owner_name FROM accounts WHERE owner_discord_id = ?"
         result = helpers.read_query('databases/accounts.sqlite', query, (ctx.author.id,))
         bank = account_amount(result[0][0])
-        await ctx.send(bank[0])
-        text = ""
-        for resource in bank[1]:
-            text += f"{resource}: {bank[1][resource]}\n"
-        await ctx.author.send(text)
+        embed = account_embed(bank[0][0], bank[0][1], bank[0][2], bank[1])
+        embed.set_footer(text="Current Account Balance")
+        await ctx.author.send(embed=embed)
         await ctx.send("DM sent")
     
     @account.command()
@@ -116,15 +121,17 @@ class Bank(commands.Cog):
         """
         arguments = (owner_discord_id, account_name, owner_nation_id)
         helpers.execute_query('databases/accounts.sqlite', query, arguments)
-        await ctx.send(account_amount(account_name))
         await ctx.send(f"Account `{account_name}` created, linked to discord id `{owner_discord_id}` and nation id `{owner_nation_id}`")
 
     @account.command()
     @commands.check(helpers.perms_nine)
-    async def update(self, ctx, account_name, *resources):
+    async def set(self, ctx, account_name, *resources):
         resources_dict = helpers.rss_list_to_dict(resources)
-        update_account(account_name, resources_dict)
-        await ctx.send(account_amount(account_name))
+        set_account(account_name, resources_dict)
+        bank = account_amount(account_name)
+        embed = account_embed(bank[0][0], bank[0][1], bank[0][2], bank[1])
+        embed.set_footer(text="New Account Balance")
+        await ctx.send(embed=embed)
 
     @account.command()
     @commands.check(helpers.perms_nine)
@@ -155,15 +162,13 @@ class Bank(commands.Cog):
         new_account_bank = {resource:account_bank[resource] for resource in account_bank}
         for resource in to_withdraw:
             new_account_bank[resource] -= to_withdraw[resource]
-        update_account(owner_name, new_account_bank)
+        set_account(owner_name, new_account_bank)
         await ctx.send(f"Sent `{to_withdraw}` to nation `{nation_name}` from `{owner_name}`'s account")
-        new_amounts = account_amount(owner_name)
-        await ctx.send(new_amounts[0])
-        new_amounts = new_amounts[1]
-        text = ""
-        for resource in new_amounts:
-            text += f"{resource}: {new_amounts[resource]}\n"
-        await ctx.send(text)
+        bank = account_amount(owner_name)
+        embed = account_embed(bank[0][0], bank[0][1], bank[0][2], bank[1])
+        embed.set_footer(text="New Account Balance")
+        await ctx.send(embed=embed)
+        
 
     @account.command()
     @commands.check(helpers.perms_nine)
@@ -178,14 +183,12 @@ class Bank(commands.Cog):
         amounts = {resources[i]:current_amounts[i] for i in range(len(resources))}
         for resource in amounts:
             amounts[resource] += resources_dict[resource]
-        update_account(account_name, amounts)
-        new_amounts = account_amount(account_name)
-        await ctx.send(new_amounts[0])
-        new_amounts = new_amounts[1]
-        text = ""
-        for resource in new_amounts:
-            text += f"{resource}: {new_amounts[resource]}\n"
-        await ctx.send(text)
+        set_account(account_name, amounts)
+        bank = account_amount(account_name)
+        embed = account_embed(bank[0][0], bank[0][1], bank[0][2], bank[1])
+        embed.set_footer(text="New Account Balance")
+        await ctx.send(embed=embed)
+        
 
     @account.error
     async def account_error(self, ctx, error):
