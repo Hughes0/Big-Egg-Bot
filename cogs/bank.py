@@ -79,7 +79,7 @@ class Bank(commands.Cog):
         self.bot = bot
 
     @commands.group()
-    @commands.check(helpers.has_account)
+    # @commands.check(helpers.has_account)
     async def account(self, ctx):
         # case no action selected
         if ctx.invoked_subcommand is None:
@@ -101,6 +101,7 @@ class Bank(commands.Cog):
             await ctx.send(embed=embed)
     
     @account.command()
+    @commands.check(helpers.has_account)
     async def me(self, ctx):
         query = "SELECT owner_name FROM accounts WHERE owner_discord_id = ?"
         result = helpers.read_query('databases/accounts.sqlite', query, (ctx.author.id,))
@@ -180,7 +181,9 @@ class Bank(commands.Cog):
             raise Exception("Account not found")
         resources = ["cash", "food", "coal", "oil", "uranium", "lead", "iron", "bauxite", "gasoline", "munitions", "steel", "aluminum"]
         current_amounts = current_amounts[0][3:]
+        print(current_amounts)
         amounts = {resources[i]:current_amounts[i] for i in range(len(resources))}
+        print(amounts)
         for resource in amounts:
             amounts[resource] += resources_dict[resource]
         set_account(account_name, amounts)
