@@ -58,6 +58,18 @@ async def reload(ctx, cog=None):
         await ctx.send(edit_cog(bot.reload_extension, cog, "reload"))
 
 
+@bot.command()
+async def color(ctx, hex_code=None):
+    if not hex_code:
+        embed = discord.Embed(title=f"{ctx.author.color}", color=ctx.author.color)
+        await ctx.send(embed=embed)
+    else:
+        str_code = hex_code
+        hex_code = int(hex(int(hex_code.replace("#", ''), 16)), 0)
+        embed = discord.Embed(title=f"#{str_code}", color=hex_code)
+        await ctx.send(embed=embed)
+    
+
 
 @bot.command()
 async def online(ctx):
