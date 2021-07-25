@@ -251,6 +251,45 @@ def nation_income_all_cities(nation_id):
     return tuple(total_income), nation_data
 
 
+def nation_income_one_city(nation_id):
+    url = f"https://politicsandwar.com/api/nation/id={nation_id}&key={helpers.apikey()}"
+    nation_data = requests.get(url).json()
+    # url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
+    # query = "query{colors{color, turn_bonus}}"
+    # color_blocs = requests.post(url,json={'query':query}).json()['data']['colors']
+    # color_bonus = lambda color: [bloc['turn_bonus'] for bloc in color_blocs if bloc['color']==color][0]*12
+    city_ids = nation_data['cityids']
+    num_cities = len(city_ids)
+    income_data, city_data = city_income(city_ids[0])
+    multiply_tuple_values = lambda t: [value * num_cities for value in t]
+    total_income = multiply_tuple_values(income_data)
+    soldiers = int(nation_data['soldiers'])
+    tanks = int(nation_data['tanks'])
+    planes = int(nation_data['aircraft'])
+    ships = int(nation_data['ships'])
+    missiles = int(nation_data['missiles'])
+    nukes = int(nation_data['nukes'])
+    military_upkeep = 0
+    if nation_data['offensivewar_ids'] or nation_data['defensivewar_ids']: # case in war
+        military_upkeep += soldiers * 1.88
+        military_upkeep += tanks * 75
+        military_upkeep += planes * 750
+        military_upkeep += ships * 5625
+        military_upkeep += missiles * 31500
+        military_upkeep += nukes * 52500
+    else: # case not in war
+        military_upkeep += soldiers * 1.25
+        military_upkeep += tanks * 50
+        military_upkeep += planes * 500
+        military_upkeep += ships * 3750
+        military_upkeep += missiles * 21000
+        military_upkeep += nukes * 35000
+    # spies?
+    total_income = total_income
+    total_income[1] += military_upkeep
+    # total_income[0] += color_bonus(nation_data['color'])
+    return tuple(total_income), nation_data
+
 
 class Calculations(commands.Cog):
     
