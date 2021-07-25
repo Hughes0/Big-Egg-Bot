@@ -4,6 +4,7 @@ import requests
 import datetime
 import random
 import concurrent.futures
+from cogs.calculations import nation_income_all_cities, nation_income_one_city
 import sys
 sys.path.append("..")
 import helpers
@@ -373,6 +374,86 @@ class Alliance(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}raids <alliance_id> [min_cities] [max_cities]`")
 
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def usage(self, ctx, days, min_cities=0, max_cities=100):
+        try:
+            days = int(days)
+        except:
+            raise Exception("Invalid selection for <days>")
+        data = helpers.get_data()
+        alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+        url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={helpers.apikey(alliance_id=alliance_id, bank_access=True)}"
+        data = requests.get(url).json()
+        if not data['success']:
+            raise Exception("Error fetching data from alliance-members endpoint")
+        nations = data['nations']
+        for nation in nations:
+            cities = nation['cities']
+            if cities > max_cities or cities < min_cities:
+                continue
+            if float(nation['coal']) == -1:
+                embed = discord.Embed(title=f"{nation['nation']} - Not showing resources", description=f"c{cities} in {nation['alliance']}")
+                await ctx.send(embed=embed)
+                continue
+            income_data, nation_data = nation_income_one_city(nation['nationid'])
+            gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
+                net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
+            net_food = round(food_production - food_consumption)
+            coal = float(nation['coal'])
+            oil = float(nation['oil'])
+            uranium = float(nation['uranium'])
+            lead = float(nation['lead'])
+            iron = float(nation['iron'])
+            bauxite = float(nation['bauxite'])
+            food = float(nation['food'])
+            def n_or_zero(n):
+                if n > 0:
+                    return n
+                else:
+                    return 0
+            def needed(current, net):
+                if net > 0:
+                    return 0
+                else:
+                    return n_or_zero(round(((net*days) * -1) - current))
+            coal_needed = needed(coal, net_coal)
+            oil_needed = needed(oil, net_oil)
+            uranium_needed = needed(uranium, net_uranium)
+            lead_needed = needed(lead, net_lead)
+            iron_needed = needed(iron, net_iron)
+            bauxite_needed = needed(bauxite, net_bauxite)
+            food_needed = needed(food, net_food)
+            c = helpers.commas
+            embed = discord.Embed(title=nation['nation'], description=f"c{cities} in {nation['alliance']}")
+            if net_coal < 0 and coal_needed > 0:
+                embed.add_field(name=f"{c(coal_needed)} Coal", value=f"{c(round(net_coal))} usage \n \
+                        (has {c(coal)} / {round(coal/(net_coal*-1),1)} days)")
+            if net_oil < 0 and oil_needed > 0:
+                embed.add_field(name=f"{c(oil_needed)} Oil", value=f"{c(round(net_oil))} usage \n \
+                        (has {c(oil)} / {round(oil/(net_oil*-1),1)} days)")
+            if net_uranium < 0 and uranium_needed > 0:
+                embed.add_field(name=f"{c(uranium_needed)} Uranium", value=f"{c(round(net_uranium))} usage \n \
+                        (has {c(uranium)} / {round(uranium/(net_uranium*-1),1)} days)")
+            if net_lead < 0 and lead_needed > 0:
+                embed.add_field(name=f"{c(lead_needed)} Lead", value=f"{c(round(net_lead))} usage \n \
+                        (has {c(lead)} / {round(lead/(net_lead*-1),1)} days)")
+            if net_iron < 0 and iron_needed > 0:
+                embed.add_field(name=f"{c(iron_needed)} Iron", value=f"{c(round(net_iron))} usage \n \
+                        (has {c(iron)} / {round(iron/(net_iron*-1),1)} days)")
+            if net_bauxite < 0 and bauxite_needed > 0:
+                embed.add_field(name=f"{c(bauxite_needed)} Bauxite", value=f"{c(round(net_bauxite))} usage \n \
+                        (has {c(bauxite)} / {round(bauxite/(net_bauxite*-1),1)} days)")
+            if net_food < 0 and food_needed > 0:
+                embed.add_field(name=f"{c(food_needed)} Food", value=f"{c(round(net_food))} usage \n \
+                        (has {c(food)} / {round(food/(net_food*-1),1)} days)")
+            await ctx.send(embed=embed)
+        await ctx.send("All nations displayed")
+
+    @usage.error
+    async def usage_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}usage [min_cities] [max_cities]`")
 
 
 def setup(bot):
