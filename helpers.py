@@ -320,3 +320,10 @@ def resource_emojis():
 
 
 commas = lambda n: "{:,}".format(n)
+
+def color_bonus(color):
+    url = f"https://api.politicsandwar.com/graphql?api_key={apikey(owner='hughes')}"
+    query = "query{colors{color, turn_bonus}}"
+    color_blocs = requests.post(url,json={'query':query}).json()['data']['colors']
+    get_color_bonus = lambda color: [bloc['turn_bonus'] for bloc in color_blocs if bloc['color']==color][0]*12
+    return get_color_bonus
