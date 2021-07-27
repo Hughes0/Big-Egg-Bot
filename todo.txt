@@ -1,16 +1,5 @@
 - Functionality to enable and disable certain features
     - for each server, store which functions/modules are enabled/disabled in database
-        
-- Use task loop to cache data
-    - market prices
-    - alliance militarization
-    - alliance treaties
-    - use single task loop that runs hourly? or multiple that all run hourly but each have a separate function?
-        - so when bot needs to be restarted the task loops still run at the right times
-        - before each loop check if the previous hour's data was successully stored
-            - if so, continue as normal
-            - if not, perform the tasks that should have been run the previous hour
-    - **each hourly task loop, check time since each task has been done last, if that time is greater than a specified amount, run the task
 
 - Application command
     - "new"
@@ -44,15 +33,6 @@
             - no arguments
             - deletes the current war channel
 
-- Log function
-    - not a command
-    - call in code
-        - when commands are used
-        - on task loop run?
-        - on database usage
-    - send to specified channel
-        - in bot testing probably
-
 - Warchest command
     - by alliance
     - store requirements in database
@@ -69,6 +49,4 @@
     - create room
         - add perms for high gov + the role + any others specified
 
-- Alliance members policies command
-    - display war and domestic policy for each member in selected city range
-    - see if there is a way to get timer for policy change?
+- Optimize color bloc calculation -- use func in helpers and cache
