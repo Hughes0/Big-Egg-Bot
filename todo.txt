@@ -50,3 +50,7 @@
         - add perms for high gov + the role + any others specified
 
 - Optimize color bloc calculation -- use func in helpers and cache
+
+- Use threading for alliance and nation by all cities income commands
+
+- Option to filter prices by time as well as date
