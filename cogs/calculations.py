@@ -536,9 +536,11 @@ class Calculations(commands.Cog):
         # catch API errors
         helpers.catch_api_error(data=nation_info, version=1)
         war_policy = nation_info['war_policy']
+        score = float(nation_info['score'])
         spies = helpers.spies(nation_id, war_policy)
-        embed = discord.Embed(title=f"Nation `id: {nation_id}` has `{spies}` spies",
-                            description=f"[politicsandwar.com/nation/id={nation_id}](https://politicsandwar.com/nation/id={nation_id})", \
+        c = helpers.commas
+        embed = discord.Embed(title=f"{nation_info['name']} has `{spies}` spies",
+                            description=f"[politicsandwar.com/nation/id={nation_id}](https://politicsandwar.com/nation/id={nation_id})\nSpy Range: **{c(round(score*0.4,2))}** - **{c(round(score*2.5,2))}**", \
                             color=ctx.author.color)
         embed.set_footer(text=f"War Policy: {war_policy}")
         await ctx.send(embed=embed)
