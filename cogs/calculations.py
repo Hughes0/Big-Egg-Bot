@@ -483,8 +483,7 @@ class Calculations(commands.Cog):
         except:
             raise ValueError("Invalid input")
         if (start_infra > goal_infra or start_infra > 10000 or 
-            goal_infra > 10000 or start_infra < 0 or goal_infra < 0 or
-            cities > 60 or cities < 0 or 
+            goal_infra > 10000 or start_infra < 0 or goal_infra < 0 or cities < 0 or 
             percent_discount < 0 or percent_discount > 100):
             raise ValueError("Values out of range")
         percent_discount = percent_discount / 100
