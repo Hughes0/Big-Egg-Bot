@@ -552,21 +552,61 @@ class Calculations(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_ten)
-    async def warchest(self, ctx, cities):
+    @commands.check(helpers.perms_two)
+    async def warchest(self, ctx, city):
         # check if input is valid
         try:
-            cities = int(cities)
+            city = int(city)
         except:
             raise ValueError("Invalid input")
-        if cities > 60 or cities < 1:
+        if city > 60 or city < 1:
             raise ValueError("Inputs out of range")
         data = helpers.get_data()
         # get alliance id from server id
-        data['discord_to_alliance'][str(ctx.guild.id)]
-        # get wc reqs based on alliance
-        # return in embed
-        await ctx.send("Command incomplete")
+        alliance_id = data['discord_to_alliance'][str(ctx.guild.id)]
+        if alliance_id == 7450:
+            nation_food = 3000
+            nation_uranium = 100
+            bank_food = 5000
+            bank_uranium = 50
+            
+            bank_munitions = 1520
+            bank_gasoline = 1520
+            if city < 20:
+                nation_steel = 750
+                nation_aluminum = 400
+                nation_gasoline = 625
+                nation_munitions = 650
+
+                bank_steel = 800
+                bank_aluminum = 750
+            else:
+                nation_steel = 750
+                nation_aluminum = 500
+                nation_gasoline = 760
+                nation_munitions = 760
+
+                bank_steel = 1000
+                bank_aluminum = 1000
+
+            on_nation = discord.Embed(title=f"warchest req for c{city}",description="this is how much you should have on your nation")
+            on_nation.add_field(name="cash",value="$" + '{:,}'.format(city*500000),inline=False)
+            on_nation.add_field(name="food",value=nation_food*city,inline=True)
+            on_nation.add_field(name="uranium",value=nation_uranium*city,inline=True)
+            on_nation.add_field(name="gasoline",value=nation_gasoline*city,inline=True)
+            on_nation.add_field(name="munitions",value=nation_munitions*city,inline=True)
+            on_nation.add_field(name="steel",value=nation_steel*city,inline=True)
+            on_nation.add_field(name="aluminum",value=nation_aluminum*city,inline=True)
+            in_bank = discord.Embed(title=f"warchest req for c{city}",description="this is how much you should have saved in the bank")
+            in_bank.add_field(name="cash",value="$" + '{:,}'.format(city*500000),inline=False)
+            in_bank.add_field(name="food",value=bank_food*city,inline=True)
+            in_bank.add_field(name="uranium",value=bank_uranium*city,inline=True)
+            in_bank.add_field(name="gasoline",value=bank_gasoline*city,inline=True)
+            in_bank.add_field(name="munitions",value=bank_munitions*city,inline=True)
+            in_bank.add_field(name="steel",value=bank_steel*city,inline=True)
+            in_bank.add_field(name="aluminum",value=bank_aluminum*city,inline=True)
+            await ctx.send(embed=on_nation)
+            await ctx.send(embed=in_bank)
         
         
     @warchest.error
