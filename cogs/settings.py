@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.utils import get
 import json
 import requests
 import sys
@@ -12,15 +13,15 @@ def get_role_name(bot, role_id):
         role_id = int(role_id)
     except:
         raise Exception("Invalid role id for get_role_name()")
+    roles = []
     for server in bot.guilds:
-        try:
-            role = server.get_role(role_id)
-        except:
-            pass
-        if role:
-            return role
-        else:
-            return None
+        roles.extend(server.roles)
+    role = [role for role in roles if role.id == int(role_id)]
+    if role:
+        return role[0].name
+    else:
+        return None
+    
 
 is_valid_permission_level = lambda permission_level: 0 <= int(permission_level) <= 10
 
