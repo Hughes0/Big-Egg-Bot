@@ -456,5 +456,48 @@ class Alliance(commands.Cog):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}usage [min_cities] [max_cities]`")
 
 
+    @commands.command()
+    @commands.check(helpers.perms_six)
+    async def checkraws(self, ctx, min_cities, max_cities):
+        data = helpers.get_data()
+        alliance_id = data["discord_to_alliance"][str(ctx.guild.id)]
+        url = f"https://politicsandwar.com/api/alliance-members/?allianceid={alliance_id}&key={helpers.apikey(alliance_id=alliance_id)}"
+        nations = requests.get(url).json()
+        try:
+            if nations['general_message']: raise RuntimeError(nations['general_message'])
+        except: pass
+        nations = nations['nations']
+        for nation in nations:
+            cities = nation['cities']
+            if int(cities) < int(min_cities) or int(cities) > int(max_cities): continue
+            nation_id = nation['nationid']
+            income_data, nation_data = nation_income_one_city(nation_id)
+            gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
+                net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
+            net_food = round(food_production - food_consumption)
+            data = {
+            'coal':{'current':float(nation['coal']),'net':net_coal},
+            'oil':{'current':float(nation['oil']),'net':net_oil},
+            'lead':{'current':float(nation['lead']),'net':net_lead},
+            'iron':{'current':float(nation['iron']),'net':net_iron},
+            'bauxite':{'current':float(nation['bauxite']),'net':net_bauxite},
+            'food':{'current':float(nation['food']),'net':net_food},
+            'uranium':{'current':float(nation['uranium']),'net':net_uranium}
+            }
+            message = f"""```
+__{nation['leader']} of {nation['nation']} ({nation_id}) - c{nation['cities']}__
+"""
+            display = False
+            for resource in ['coal','oil','iron','lead','bauxite','food','uranium']:
+                resource_data = data[resource]
+                if resource_data['net'] >= 0: continue
+                else: pass
+                display = True
+                message += f"{resource}: has {'{:,}'.format(resource_data['current'])}, is using {'{:,}'.format(round(resource_data['net'],2))}\n"
+            message+='\n```'
+            if display:
+                await ctx.send(message)
+
+
 def setup(bot):
     bot.add_cog(Alliance(bot))

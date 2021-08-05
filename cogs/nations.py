@@ -45,7 +45,7 @@ class Nations(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_nine)
+    @commands.check(helpers.perms_seven)
     async def warvisv2(self, ctx, alliance_ids):
         url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
         response = requests.get(url).json()
@@ -70,7 +70,7 @@ class Nations(commands.Cog):
 
 
     @commands.command()
-    @commands.check(helpers.perms_nine)
+    @commands.check(helpers.perms_seven)
     async def warvis(self, ctx, alliance_ids):
         url = f"https://api.politicsandwar.com/graphql?api_key={helpers.apikey(owner='hughes')}"
         by_cities = lambda nation: nation['num_cities']
