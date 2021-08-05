@@ -3,6 +3,7 @@ from discord.ext import commands
 import requests
 import json
 import sys
+from bs4 import BeautifulSoup
 sys.path.append('..')
 import helpers
 
@@ -333,6 +334,31 @@ Total Value: **${'{:,}'.format(entry[-1])}**
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}policies <alliance_id> [min_cities] [max_cities]`")
 
+
+    @commands.command()
+    async def nsearch(self, ctx, query):
+        url = ("https://politicsandwar.com/index.php?id=15&keyword=" + query + "&cat=everything&ob=score&od=DESC&backpage=%3C%3C&maximum=3&minimum=0")
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        table = soup.find('table',class_="nationtable")
+        results = table.find_all('td')
+        results_displayed = 0
+        for result in results:
+            if results_displayed == 3:
+                break
+            try:
+                link = result.find('a').get('href')
+                nation = result.text.split('\n')[1]
+                leader = result.text.split('\r')[1].replace('  ','').replace('\n','').replace('\n','')
+                results_displayed += 1
+                await ctx.send(f"{leader}of {nation} - {link}")
+            except:
+                continue
+
+    @nsearch.error
+    async def nsearch_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}nsearch <query>`")
 
 
 
