@@ -651,6 +651,7 @@ class Calculations(commands.Cog):
             city_id = int(city_id)
         except:
             raise Exception("Invalid input")
+        await ctx.send("Calculating...")
         income_data, city_data = city_income(city_id)
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
@@ -726,6 +727,7 @@ class Calculations(commands.Cog):
 
     @income.command()
     async def nation(self, ctx, nation_id):
+        await ctx.send("Calculating...")
         income_data, nation_data = nation_income_all_cities(nation_id)
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
@@ -803,6 +805,7 @@ class Calculations(commands.Cog):
 
     @income.command()
     async def alliance(self, ctx, alliance_id):
+        await ctx.send("Calculating...")
         income_data, alliance_data = alliance_income(alliance_id, nation_income_one_city)
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
@@ -818,60 +821,61 @@ class Calculations(commands.Cog):
         food_value = round((food_production-food_consumption), 2) * int(prices['food']['avg_price'])
         total_dnr += food_value
         embed.add_field(name="Food", \
-                value=f"{round(food_production-food_consumption,2)}\n\
+                value=f"{commas(round(food_production-food_consumption,2))}\n\
                 (`${commas(food_value)}`)", \
                 inline=True)
         coal_value = round(net_coal * int(prices['coal']['avg_price']), 2)
         total_dnr += coal_value
         embed.add_field(name="Coal", \
-                value=f"{round(net_coal, 2)}\n(`${commas(coal_value)}`)", \
+                value=f"{commas(round(net_coal, 2))}\n(`${commas(coal_value)}`)", \
                 inline=True)
         oil_value = round(net_oil * int(prices['oil']['avg_price']), 2)
         total_dnr += oil_value
         embed.add_field(name="Oil", \
-                value=f"{round(net_oil, 2)}\n(`${commas(oil_value)}`)", \
+                value=f"{commas(round(net_oil, 2))}\n(`${commas(oil_value)}`)", \
                 inline=True)
         uranium_value = round(net_uranium * int(prices['uranium']['avg_price']), 2)
         total_dnr += uranium_value
         embed.add_field(name="Uranium", \
-                value=f"{round(net_uranium, 2)}\n(`${commas(uranium_value)}`)", \
+                value=f"{commas(round(net_uranium, 2))}\n(`${commas(uranium_value)}`)", \
                 inline=True)
         lead_value = round(net_lead * int(prices['lead']['avg_price']), 2)
         total_dnr += lead_value
         embed.add_field(name="Lead", \
-                value=f"{round(net_lead, 2)}\n(`${commas(lead_value)}`)", \
+                value=f"{commas(round(net_lead, 2))}\n(`${commas(lead_value)}`)", \
                 inline=True)
         iron_value = round(net_iron * int(prices['iron']['avg_price']), 2)
         total_dnr += iron_value
         embed.add_field(name="Iron", \
-                value=f"{round(net_iron, 2)}\n(`${commas(iron_value)}`)", \
+                value=f"{commas(round(net_iron, 2))}\n(`${commas(iron_value)}`)", \
                 inline=True)
         bauxite_value = round(net_bauxite * int(prices['bauxite']['avg_price']), 2)
         total_dnr += bauxite_value
         embed.add_field(name="Bauxite", \
-                value=f"{round(net_bauxite, 2)}\n(`${commas(bauxite_value)}`)", \
+                value=f"{commas(round(net_bauxite, 2))}\n(`${commas(bauxite_value)}`)", \
                 inline=True)
         gasoline_value = round(net_gasoline * int(prices['gasoline']['avg_price']), 2)
         total_dnr += gasoline_value
         embed.add_field(name="Gasoline", \
-                value=f"{round(net_gasoline, 2)}\n(`${commas(gasoline_value)}`)", \
+                value=f"{commas(round(net_gasoline, 2))}\n(`${commas(gasoline_value)}`)", \
                 inline=True)
         munitions_value = round(net_munitions * int(prices['munitions']['avg_price']), 2)
         total_dnr += munitions_value
         embed.add_field(name="Munitions", \
-                value=f"{round(net_munitions, 2)}\n(`${commas(munitions_value)}`)", \
+                value=f"{commas(round(net_munitions, 2))}\n(`${commas(munitions_value)}`)", \
                 inline=True)
         steel_value = round(net_steel * int(prices['steel']['avg_price']), 2)
         total_dnr += steel_value
         embed.add_field(name="Steel", \
-                value=f"{round(net_steel, 2)}\n(`${commas(steel_value)}`)", \
+                value=f"{commas(round(net_steel, 2))}\n(`${commas(steel_value)}`)", \
                 inline=True)
         aluminum_value = round(net_aluminum * int(prices['aluminum']['avg_price']), 2)
         total_dnr += aluminum_value
         embed.add_field(name="Aluminum", \
-                value=f"{round(net_aluminum, 2)}\n(`${commas(aluminum_value)}`)", \
+                value=f"{commas(round(net_aluminum, 2))}\n(`${commas(aluminum_value)}`)", \
                 inline=True)
         embed.title = f"DNR for the alliance of {alliance_data['name']}: ${commas(round(total_dnr, 2))}"
+        embed.set_footer(text=f"{alliance_data['cities']} cities | {alliance_data['members']-alliance_data['vmodemembers']} members | {commas(float(alliance_data['score']))} score")
         await ctx.send(embed=embed)
 
     @income.error
