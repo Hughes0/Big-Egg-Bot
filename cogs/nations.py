@@ -181,7 +181,8 @@ class Nations(commands.Cog):
             while '  ' in text:
                 text = text.replace('  ', ' ')
             return text
-        if ctx.guild.id == 700094396653240341:
+        # bot testing and paragon
+        if ctx.guild.id == 700094396653240341 or ctx.guild.id == 869424139037990912:
             query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY total_loot_value DESC LIMIT ?"
         else:
             query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? AND alliance_id = 0 ORDER BY total_loot_value DESC LIMIT ?"
