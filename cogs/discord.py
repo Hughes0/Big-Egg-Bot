@@ -68,6 +68,8 @@ class Discord(commands.Cog):
             for row in reader:
                 if not row[0]:
                     continue
+                if row[-1] != ",":
+                    row += ","
                 category = row[-2].replace('"', '')
                 orders = row[-1].replace('"', '')
                 hitters = []
