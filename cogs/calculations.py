@@ -652,7 +652,11 @@ class Calculations(commands.Cog):
         except:
             raise Exception("Invalid input")
         await ctx.send("Calculating...")
-        income_data, city_data = city_income(city_id)
+        try:
+            income_data, city_data = city_income(city_id)
+        except:
+            await ctx.send("Error calculating income")
+            return
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
         prices = helpers.cached_prices()
@@ -728,7 +732,11 @@ class Calculations(commands.Cog):
     @income.command()
     async def nation(self, ctx, nation_id):
         await ctx.send("Calculating...")
-        income_data, nation_data = nation_income_all_cities(nation_id)
+        try:
+            income_data, nation_data = nation_income_all_cities(nation_id)
+        except:
+            await ctx.send("Error calculating income")
+            return
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
         prices = helpers.cached_prices()
@@ -806,7 +814,11 @@ class Calculations(commands.Cog):
     @income.command()
     async def alliance(self, ctx, alliance_id):
         await ctx.send("Calculating...")
-        income_data, alliance_data = alliance_income(alliance_id, nation_income_one_city)
+        try:
+            income_data, alliance_data = alliance_income(alliance_id, nation_income_one_city)
+        except:
+            await ctx.send("Error calculating income")
+            return
         gross_cash, upkeep, food_production, food_consumption, net_coal, net_oil, net_uranium, \
             net_lead, net_iron, net_bauxite, net_gasoline, net_munitions, net_steel, net_aluminum = income_data
         prices = helpers.cached_prices()
