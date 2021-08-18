@@ -499,5 +499,76 @@ __{nation['leader']} of {nation['nation']} ({nation_id}) - c{nation['cities']}__
                 await ctx.send(message)
 
 
+    @checkraws.error
+    async def checkraws_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}checkraws <min_cities> <max_cities>`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_one)
+    async def bankbyloot(self, ctx, alliance_id):
+        key = helpers.apikey()
+        wars = requests.get("http://politicsandwar.com/api/wars/5000&alliance_id=%s&key=%s" % (str(alliance_id),key)).json()["wars"]
+        alliance_info = requests.get("http://politicsandwar.com/api/alliance/id=%s&key=%s" % (alliance_id,key)).json()
+        try:
+            if alliance_info['error'] and "api" not in alliance_info['error'].lower():
+                await ctx.send("Error fetching alliance data")
+                return
+        except:
+            pass
+        alliance_name = alliance_info['name']
+        if len(wars) < 1:
+            defeat = None
+        for war in wars:
+            if (war["status"] == "Attacker Victory" and war["defenderAA"] == alliance_name) or (war["status"] == "Defender Victory" and war["attackerAA"] == alliance_name):
+                defeat = war["warID"]
+        if defeat is not None:
+            beige = requests.get("http://politicsandwar.com/api/war-attacks/key=%s&war_id=%s" % (key,defeat)).json()["war_attacks"]
+            alliance_loot = beige[0]["note"].replace('\n', ' ').replace('\r', '').replace('                                              ',' ')
+            percent = float(alliance_loot.split('%')[0].split('looted ')[1])
+            try:
+                multiply_by = 100/percent
+            except:
+                multiply_by = 100/0.01
+            date = beige[0]["date"]
+            cash = int(alliance_loot.split("$")[1].split(", ")[0].replace(",",""))*multiply_by
+            coal = int(alliance_loot.split(" Coal")[0].split(", ")[2].replace(",",""))*multiply_by
+            oil = int(alliance_loot.split(" Oil")[0].split(", ")[3].replace(",",""))*multiply_by
+            uranium = int(alliance_loot.split(" Uranium")[0].split(", ")[4].replace(",",""))*multiply_by
+            iron = int(alliance_loot.split(" Iron")[0].split(", ")[5].replace(",",""))*multiply_by
+            bauxite = int(alliance_loot.split(" Bauxite")[0].split(", ")[6].replace(",",""))*multiply_by
+            lead = int(alliance_loot.split(" Lead")[0].split(", ")[7].replace(",",""))*multiply_by
+            gasoline = int(alliance_loot.split(" Gasoline")[0].split(", ")[8].replace(",",""))*multiply_by
+            munitions = int(alliance_loot.split(" Munitions")[0].split(", ")[9].replace(",",""))*multiply_by
+            steel = int(alliance_loot.split(" Steel")[0].split(", ")[10].replace(",",""))*multiply_by
+            aluminum = int(alliance_loot.split(" Aluminum")[0].split(", ")[11].replace(",",""))*multiply_by
+            food = int(alliance_loot.split(" Food")[0].split("and ")[-1].replace(",",""))*multiply_by
+            info = [alliance_loot,date,cash,coal,oil, uranium, iron, bauxite, lead, gasoline, munitions, steel, aluminum, food]
+            embed = discord.Embed(title=("bank of %s" % alliance_id),description=("as of %s" % info[1]))
+            embed.add_field(name="cash",value=("{:,}".format(int(info[2]))))
+            embed.add_field(name="coal",value=("{:,}".format(int(info[3]))))
+            embed.add_field(name="oil",value=("{:,}".format(int(info[4]))))
+            embed.add_field(name="uranium",value=("{:,}".format(int(info[5]))))
+            embed.add_field(name="iron",value=("{:,}".format(int(info[6]))))
+            embed.add_field(name="bauxite",value=("{:,}".format(int(info[7]))))
+            embed.add_field(name="lead",value=("{:,}".format(int(info[8]))))
+            embed.add_field(name="gasoline",value=("{:,}".format(int(info[9]))))
+            embed.add_field(name="munitions",value=("{:,}".format(int(info[10]))))
+            embed.add_field(name="steel",value=("{:,}".format(int(info[11]))))
+            embed.add_field(name="aluminum",value=("{:,}".format(int(info[12]))))
+            embed.add_field(name="food",value=("{:,}".format(int(info[13]))))
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(title="No defeat found")
+            await ctx.send(embed=embed)
+    
+    @bankbyloot.error
+    async def bankbyloot_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}bankbyloot <alliance_id>`")
+    
+
+
 def setup(bot):
     bot.add_cog(Alliance(bot))
