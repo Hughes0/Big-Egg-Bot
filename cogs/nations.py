@@ -368,7 +368,7 @@ Total Value: **${'{:,}'.format(entry[-1])}**
         url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
         data = requests.get(url).json()['data']
         data.sort(key=lambda n: n['cities'], reverse=True)
-        with open("../nationsheet.csv", 'w') as f:
+        with open("./nationsheet.csv", 'w') as f:
             for nation in data:
                 # nation_id, leader, nation, alliance, city, score, off war range, def war range, since_active, policy, beige, vm turns, beige, off wars, def wars, soldiers, tanks, planes, ships, link
                 entry = f"{nation['nation_id']},{nation['leader']},{nation['nation']},{nation['alliance']},{nation['cities']},{nation['score']},{int(round(nation['score']*0.75,0))} - {int(round(nation['score']*1.75,0))},{int(round(nation['score']/1.75,0))} - {int(round(nation['score']/0.75,0))},,{nation['war_policy']},{nation['beige_turns']},{nation['v_mode_turns']},{nation['offensive_wars']},{nation['defensive_wars']},{nation['soldiers']}, {nation['tanks']},{nation['aircraft']},{nation['ships']},https://politicsandwar.com/nation/id={nation['nation_id']}\n"
@@ -383,12 +383,33 @@ Total Value: **${'{:,}'.format(entry[-1])}**
 7. Change 'create new spreadsheet' to 'replace data and current cell'
 8. Press import data"""
         await ctx.send(instructions)
-        await ctx.send(file=discord.File('../nationsheet.csv'))
+        await ctx.send(file=discord.File('./nationsheet.csv'))
 
     @nationsheet.error
     async def nationsheet_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}nationsheet <alliance ids: comma separated, no spaces>`")
+
+
+    @commands.command()
+    @commands.check(helpers.perms_seven)
+    async def nationsheet2(self, ctx, alliance_ids):
+        url = f"https://politicsandwar.com/api/v2/nations/{helpers.apikey()}/&alliance_id={alliance_ids}&alliance_position=2,3,4,5&v_mode=false"
+        data = requests.get(url).json()['data']
+        data.sort(key=lambda n: n['cities'], reverse=True)
+        with open("./nationsheet2.csv", 'w') as f:
+            for nation in data:
+                score = nation['score']
+                # nation_id, leader, nation, alliance, link, cities, def range, off range, policy, beige, activity, total infra, def wars, off wars, soldiers, tanks, planes, ships, missiles, nukes, vm, planes per city, tanks per city
+                entry = f"{nation['nation_id']},{nation['leader']},{nation['nation']},{nation['alliance']},https://politicsandwar.com/nation/id={nation['nation_id']},{nation['cities']},{round(score/1.75)} - {round(score/0.75)},{round(score*0.75)} - {round(score*1.75)},{helpers.api_v2_war_policy(nation['war_policy'])},{nation['beige_turns']},{nation['last_active']},n/a,{nation['defensive_wars']},{nation['offensive_wars']},{nation['soldiers']},{nation['tanks']},{nation['aircraft']},{nation['ships']},{nation['missiles']},{nation['nukes']},{nation['v_mode_turns']},{round(nation['aircraft']/nation['cities'],1)},{round(nation['tanks']/nation['cities'],1)}\n"
+                f.write(entry)
+        await ctx.send(file=discord.File('./nationsheet2.csv'))
+
+    @nationsheet2.error
+    async def nationsheet2_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}nationsheet2 <alliance ids: comma separated, no spaces>`")
+
 
 
 def setup(bot):
