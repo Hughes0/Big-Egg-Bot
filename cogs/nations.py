@@ -173,7 +173,7 @@ class Nations(commands.Cog):
         # disallowed_alliances_query = " OR ".join(disallowed_alliances)
         # AND NOT ({disallowed_alliances_query})
         with open('/home/pi/Code/Big-Egg-Bot/raidfinder.txt', 'r') as f:
-            content = f.read()
+           content = f.read()
         if 'disallow' in content:
             raise Exception("Raidfinder updating, please wait")
         def prettify_loot(text):
@@ -181,8 +181,10 @@ class Nations(commands.Cog):
             while '  ' in text:
                 text = text.replace('  ', ' ')
             return text
-        # bot testing and paragon
-        if ctx.guild.id == 700094396653240341 or ctx.guild.id == 869424139037990912:
+        # bot testing and paragon and frenchm
+        if ctx.guild.id == 700094396653240341 or ctx.guild.id == 869424139037990912 or ctx.guild.id == 794032133051645973:
+            query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY total_loot_value DESC LIMIT ?"
+        elif ctx.guild.id == 882831852396748820:
             query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? ORDER BY total_loot_value DESC LIMIT ?"
         else:
             query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? AND alliance_id = 0 ORDER BY total_loot_value DESC LIMIT ?"
