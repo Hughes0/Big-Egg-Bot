@@ -41,7 +41,7 @@ def check_nation(nation):
         beige_attack = [attack for attack in war['attacks'] if attack['type'] == "VICTORY"]
         if not beige_attack:
             continue
-        defeat_date = datetime.datetime.strptime(beige_attack[0]['date'], "%Y-%m-%d %H:%M:%S")
+        defeat_date = datetime.datetime.strptime(beige_attack[0]['date'], "%Y-%m-%dT%H:%M:%S+00:00")
         if defeat_date > last_defeat_date:
             last_defeat_date = defeat_date
             last_defeat = war
