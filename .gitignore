@@ -6,3 +6,4 @@ databases/
 *.csv
 *.sqlite
 raidfinder.txt
+.env

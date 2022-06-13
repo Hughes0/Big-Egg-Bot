@@ -2,9 +2,12 @@ import helpers
 import os
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
 
 intents = discord.Intents().all()
-bot = commands.Bot(command_prefix = "$", intents=intents)
+bot = commands.Bot(command_prefix = os.getenv("PREFIX"), intents=intents)
 
 
 
