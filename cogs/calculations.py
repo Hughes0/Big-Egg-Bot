@@ -439,6 +439,8 @@ class Calculations(commands.Cog):
                 raise ValueError("Error selecting project")
         except:
             raise ValueError("Error parsing inputs")
+        if start_city < 0 or goal_city > 80:
+            raise ValueError("City values out of range")
         cost = 0
         # iterate through cities to purchase
         for current_city in range(start_city, goal_city):
