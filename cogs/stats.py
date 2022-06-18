@@ -63,15 +63,15 @@ def add_stat_fields_to_embed(p1_stat_obj, p2_stat_obj, embed):
     {att_ships_lost}
     {att_missiles_used}
     {att_nukes_used}
-    ${c(attacker['soldiers_lost_value']+attacker['tanks_lost_value']+attacker['planes_lost_value']+attacker['ships_lost_value']+attacker['missiles_used_value']+attacker['nukes_used_value'])}
+    ${c(round(attacker['soldiers_lost_value']+attacker['tanks_lost_value']+attacker['planes_lost_value']+attacker['ships_lost_value']+attacker['missiles_used_value']+attacker['nukes_used_value'],2))}
     -
     {c(round(attacker['gas_used'],2))}
     {c(round(attacker['muni_used'], 2))}
-    ${c(attacker['gas_used_value'] + attacker['muni_used_value'])}
+    ${c(round(attacker['gas_used_value'] + attacker['muni_used_value'],2))}
     -
-    ${c(attacker['money_casualties'])}
-    ${c(attacker['loot_lost_value'])}
-    ${c(attacker['infra_lost_value'])}"""
+    ${c(round(attacker['money_casualties'],2))}
+    ${c(round(attacker['loot_lost_value'],2))}
+    ${c(round(attacker['infra_lost_value'],2))}"""
     embed.add_field(
         name="P1 Lost",
         value=attacker_losses_field_str
@@ -84,15 +84,15 @@ def add_stat_fields_to_embed(p1_stat_obj, p2_stat_obj, embed):
     {def_ships_lost}
     {def_missiles_used}
     {def_nukes_used}
-    ${c(defender['soldiers_lost_value']+defender['tanks_lost_value']+defender['planes_lost_value']+defender['ships_lost_value']+defender['missiles_used_value']+defender['nukes_used_value'])}
+    ${c(round(defender['soldiers_lost_value']+defender['tanks_lost_value']+defender['planes_lost_value']+defender['ships_lost_value']+defender['missiles_used_value']+defender['nukes_used_value'],2))}
     -
     {c(round(defender['gas_used'],2))}
     {c(round(defender['muni_used'],2))}
-    ${c(defender['gas_used_value'] + defender['muni_used_value'])}
+    ${c(round(defender['gas_used_value'] + defender['muni_used_value'],2))}
     -
-    ${c(defender['money_casualties'])}
-    ${c(defender['loot_lost_value'])}
-    ${c(defender['infra_lost_value'])}"""
+    ${c(round(defender['money_casualties'],2))}
+    ${c(round(defender['loot_lost_value'],2))}
+    ${c(round(defender['infra_lost_value'],2))}"""
     embed.add_field(
         name="P2 Lost",
         value=defender_losses_field_str
