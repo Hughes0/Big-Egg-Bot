@@ -3,11 +3,11 @@ from discord.ext import commands
 import datetime
 import requests
 import os
-import json
 import sys
 sys.path.append('..')
 import helpers
 from helpers import commas as c
+from helpers import parse_success_level
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -218,7 +218,55 @@ class Stats(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}stats <min_date: yyyy-mm-dd> <max_date: yyyy-mm-dd | now> <p1_id> <p1_type: nation/alliance> [p2_id] [p2_type: nation/alliance]`")
 
+
+    @commands.command()
+    @commands.check(helpers.perms_one)
+    async def wars(self, ctx, nation_id):
+        try:
+            nation_id = int(nation_id)
+        except:
+            raise Exception("Invalid `war_id`")
+        response = requests.get(f"{moometrics_api_url}/wars?involved_nation_id={nation_id}&active=True")
+        data = response.json()
+        wars = data['wars']
+        if not wars:
+            raise Exception("No wars found")
+        text = "```" + '\n'.join([
+            f"{war['id']} | {war['start_date']} | {war['attacker']['name']} attacked {war['defender']['name']} | {war['war_type']}" for war in wars
+        ]) + "```"
+        await ctx.send(text)
+        
+    @wars.error
+    async def wars_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}wars <nation_id>`")
+
+
     
+    @commands.command()
+    @commands.check(helpers.perms_one)
+    async def warattacks(self, ctx, war_id):
+        try:
+            war_id = int(war_id)
+        except:
+            raise Exception("Invalid `war_id`")
+        response = requests.get(f"{moometrics_api_url}/attacks?war_id={war_id}")
+        data = response.json()
+        attacks = data['attacks']
+        if not attacks:
+            raise Exception("No attacks found")
+        text = "```" + '\n'.join([
+            f"{attack['id']} | {attack['date_time']} | {attack['attacker']['name']} attacked {attack['defender']['name']} | {attack['attack_type']} | {parse_success_level(attack['success'])}" for attack in attacks
+        ]) + "```"
+        await ctx.send(text)
+        
+    @warattacks.error
+    async def warattacks_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Missing argument, correct syntax is `{self.bot.command_prefix}warattacks <war_id>`")
+
+
+
 
 def setup(bot):
     bot.add_cog(Stats(bot))

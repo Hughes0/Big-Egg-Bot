@@ -327,3 +327,15 @@ def color_bonus(color):
     color_blocs = requests.post(url,json={'query':query}).json()['data']['colors']
     get_color_bonus = lambda color: [bloc['turn_bonus'] for bloc in color_blocs if bloc['color']==color][0]*12
     return get_color_bonus
+
+def parse_success_level(success_level):
+    if success_level == 0:
+        return "Utter Failure"
+    elif success_level == 1:
+        return "Pyrrhic Victory"
+    elif success_level == 2:
+        return "Moderate Success"
+    elif success_level == 3:
+        return "Immense Triumph"
+    else:
+        raise Exception(f"Invalid succes_level: {success_level}")
