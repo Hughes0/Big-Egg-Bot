@@ -142,6 +142,8 @@ class Alliance(commands.Cog):
     @commands.command()
     @commands.check(helpers.perms_six)
     async def aaspies(self, ctx, alliance_id, min_cities=0, max_cities=100):
+        raise Exception("Nope")
+        return
         # check if inputs are valid
         helpers.check_city_inputs(min_cities, max_cities)
         # get alliance id from server id from keys.json
