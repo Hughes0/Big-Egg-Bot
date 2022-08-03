@@ -526,6 +526,8 @@ class Calculations(commands.Cog):
     @commands.command()
     @commands.check(helpers.perms_two)
     async def spies(self, ctx, nation_id):
+        raise Exception("Nope")
+        return
         # check if inputs are valid
         try:
             nation_id = int(nation_id)
