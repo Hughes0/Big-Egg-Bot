@@ -48,16 +48,19 @@ def check_nation(nation):
     if not last_defeat:
         return
     # get winner of war
-    winner = last_defeat['winner']    
-    if winner == last_defeat['attacker']['id']:
-        # if winner is attacker
-        # set nation variables to defender's info
-        loser = last_defeat['defender']
-    elif winner == last_defeat['defender']['id']:
-        # if winner is defender
-        # set nation variables to attacker's info
-        loser = last_defeat['attacker']
-    else:
+    winner = last_defeat['winner']
+    loser = None
+    if last_defeat['attacker']:
+        if winner == last_defeat['attacker']['id']:
+            # if winner is attacker
+            # set nation variables to defender's info
+            loser = last_defeat['defender']
+    if last_defeat['defender']:
+        if winner == last_defeat['defender']['id']:
+            # if winner is defender
+            # set nation variables to attacker's info
+            loser = last_defeat['attacker']
+    if not loser:
         return
     open_slots = 3 - len([war for war in loser['defensive_wars'] if war['turnsleft'] > 0])
     # get nation loot

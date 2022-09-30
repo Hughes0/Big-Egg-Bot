@@ -6,5 +6,5 @@ __pycache__/
 databases/
 *.csv
 *.sqlite
-raidd$"finder.txt
+raidfinder.txt
 .env
