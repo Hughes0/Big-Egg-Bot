@@ -433,9 +433,9 @@ class Calculations(commands.Cog):
         try:
             start_city = int(start_city)
             goal_city = int(goal_city)
-            percent_discount = int(percent_discount) / 100
+            percent_discount = float(percent_discount) / 100
             project = project.lower()
-            if project not in ['0', 'cp', 'acp']:
+            if project not in ['0', 'cp', 'acp', 'mp']:
                 raise ValueError("Error selecting project")
         except:
             raise ValueError("Error parsing inputs")
@@ -446,14 +446,24 @@ class Calculations(commands.Cog):
         for current_city in range(start_city, goal_city):
             # calculate cost of next city
             next_city_cost = 50000*((current_city)-1)**3 + 150000*(current_city) + 75000
-            # apply city planning discount when next city is at least 12
+            # apply city planning discount when current city is at least 12
             if project == 'cp' and current_city >= 11:
                 next_city_cost -= 50000000
             elif project == 'acp':
-                # apply full advanced city planning discount when next city is at least 16
+                # apply full advanced city planning discount when current city is at least 16
                 if current_city >= 16:
                     next_city_cost -= 150000000
-                # apply partial advanced city planning discount when next city is at least 11 but less than 16
+                # apply only city planning discount when current city is at least 11 but less than 16
+                elif current_city >= 11:
+                    next_city_cost -= 50000000
+            elif project == 'mp':
+                # apply full discount when city is at least 21
+                if current_city >= 21:
+                    next_city_cost -= 300000000
+                # apply only advanced city planning discount when city is at least 16 but less than 21
+                elif current_city >= 16:
+                    next_city_cost -= 150000000
+                # apply only city planning discount when city is at least 11 but less than 16
                 elif current_city >= 11:
                     next_city_cost -= 50000000
             # apply discounts to cost of next city
