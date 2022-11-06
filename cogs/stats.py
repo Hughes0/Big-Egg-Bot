@@ -2,9 +2,14 @@ import discord
 from discord.ext import commands
 import datetime
 import requests
-import os
 import sys
-sys.path.append('..')
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
 import helpers
 from helpers import commas as c
 from helpers import parse_success_level

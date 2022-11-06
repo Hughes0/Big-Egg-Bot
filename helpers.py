@@ -4,28 +4,24 @@ import requests
 import sqlite3
 from sqlite3 import Error
 import datetime
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+project_path = os.getenv("PROJECT_PATH")
+database_name = os.getenv("DATABASE_NAME")
 
 def get_data():
-    with open("keys.json") as f:
+    with open(project_path + "keys.json") as f:
         data = json.loads(f.read())
     return data
 
-
-def login(session):
-    login_url = "https://politicsandwar.com/login/"
-    data = get_data()
-    login_data = {
-        "email": data['email'],
-        "password": data['password'],
-        "loginform": "Login"
-    }
-    session.post(url=login_url, data=login_data)
-
-
-def execute_query(filename, query, arguments=None):
+def execute_query(query, arguments=None):
     # execute a write query on a database
-    connection = sqlite3.connect(filename)
+    database_path = project_path + database_name
+    print(database_path)
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     try:
         if not arguments:
@@ -33,14 +29,15 @@ def execute_query(filename, query, arguments=None):
         else:
             cursor.execute(query, arguments)
         connection.commit()
-        print(f"{datetime.datetime.now()}: Executed write query to {filename} successfully")
+        print(f"{datetime.datetime.now()}: Executed write query to {database_path} successfully")
     except Error as e:
         raise Exception(e)
 
 
-def read_query(filename, query, arguments=None):
+def read_query(query, arguments=None):
     # execute a read query on a database
-    connection = sqlite3.connect(filename)
+    database_path = project_path + database_name
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     try:
         if not arguments:
@@ -48,7 +45,7 @@ def read_query(filename, query, arguments=None):
         else:
             cursor.execute(query, arguments)
         result = cursor.fetchall()
-        print(f"{datetime.datetime.now()}: Read from database in {filename} successfully")
+        print(f"{datetime.datetime.now()}: Read from database in {database_path} successfully")
         return result
     except Error as e:
         raise Exception(e)
@@ -62,7 +59,7 @@ def apikey(alliance_id=None, requests_needed=1, bank_access=False, owner=None):
         query += f" AND alliance_position >= 4"
     if owner:
         query += f" AND owner = '{owner}'"
-    results = read_query('databases/keys.sqlite', query)
+    results = read_query(query)
     if not bank_access:
         non_bank_keys = []
         for entry in results:
@@ -74,9 +71,10 @@ def apikey(alliance_id=None, requests_needed=1, bank_access=False, owner=None):
 
 
 def check(ctx, level):
+    #####
     # 10: bot admin
-    # 9: eclipse leaders
-    # 8: eclipse bankaccess
+    # 9: current alliance leaders
+    # 8: current alliance bankaccess
     # 7: all highgov
     # 6: all lowgov
     # 5: 
@@ -84,11 +82,14 @@ def check(ctx, level):
     # 3: 
     # 2: all members
     # 1: basic
+    #####
     # roles of user requesting to use command
     roles = [role.id for role in ctx.author.roles]
     # ids of roles with allowed permissions
     query = f"SELECT role_id FROM permissions WHERE permission_level >= {level}"
-    allowed_roles = [entry[0] for entry in read_query('databases/permissions.sqlite', query)]
+    allowed_roles = [
+        entry[0] for entry in read_query(query)
+    ]
     for role in roles:
         if role in allowed_roles:
             return True
@@ -128,7 +129,7 @@ def perms_one(ctx):
 
 def has_account(ctx):
     # allow level 10 OR people with an account in account.sqlite
-    result = [entry[0] for entry in read_query('databases/accounts.sqlite', "SELECT owner_discord_id FROM accounts")]
+    result = [entry[0] for entry in read_query("SELECT owner_discord_id FROM accounts")]
     if perms_ten(ctx) or ctx.author.id in result:
         return True
     else:
@@ -182,7 +183,7 @@ def prices(resources):
 
 def cached_prices():
     query = "SELECT * FROM prices"
-    result = read_query('databases/game_data.sqlite', query)
+    result = read_query(query)
     price_data = {}
     for entry in result:
         price_data[entry[0]] = {

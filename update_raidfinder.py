@@ -89,7 +89,7 @@ def check_nation(nation):
     arguments = (loser['id'], loser['score'], loser['beigeturns'], last_defeat['war_type'], \
             open_slots, loser['alliance_id'], beige_attack['date'], beige_attack['loot_info'], beige_loot, \
             bank_loot_raw, bank_loot, loot_value)
-    helpers.execute_query('databases/raids.sqlite', query, arguments)
+    helpers.execute_query(query, arguments)
 
 def get_wars():
     url = f"https://politicsandwar.com/api/alliances/?key={helpers.apikey()}"
@@ -170,8 +170,8 @@ if __name__ == "__main__":
             total_loot_value INTEGER
         )
     """
-    helpers.execute_query('databases/raids.sqlite', delete_raid_table)
-    helpers.execute_query('databases/raids.sqlite', create_raid_table)
+    helpers.execute_query(delete_raid_table)
+    helpers.execute_query(create_raid_table)
     get_wars()
     data = {}
     data['content'] = "raidfinder updating complete"

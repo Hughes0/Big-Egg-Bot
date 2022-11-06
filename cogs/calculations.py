@@ -5,7 +5,13 @@ import random
 import requests
 import math
 import sys
-sys.path.append('..')
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
 import helpers
 
 

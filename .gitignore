@@ -8,3 +8,4 @@ databases/
 *.sqlite
 raidfinder.txt
 .env
+*.db

@@ -1,11 +1,16 @@
 import discord
 from discord.ext import commands
 import requests
-import json
 import discord.utils
 import csv
 import sys
-sys.path.append('..')
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
 import helpers
 
 

@@ -6,7 +6,7 @@ import helpers
 
 def store_prices():
     prices = helpers.prices("all")
-    helpers.execute_query('databases/game_data.sqlite', "DELETE FROM prices;")
+    helpers.execute_query("DELETE FROM prices;")
     for resource in prices:
         data = prices[resource]
         if data['highestbuy']:
@@ -24,7 +24,7 @@ def store_prices():
                 (?, ?, ?, ?)
         """
         arguments = (resource, sell_market, buy_market, int(data['avgprice']))
-        helpers.execute_query('databases/game_data.sqlite', query, arguments)
+        helpers.execute_query(query, arguments)
 
 
 

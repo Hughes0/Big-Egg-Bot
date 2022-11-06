@@ -5,8 +5,14 @@ import json
 import requests
 import sys
 import os
-sys.path.append('..')
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
 import helpers
+
 
 def get_role_name(bot, role_id):
     try:
@@ -47,13 +53,13 @@ class Settings(commands.Cog):
         if role_id == "all":
             # send all permissions
             query = "SELECT * FROM permissions"
-            results = helpers.read_query('databases/permissions.sqlite', query)
+            results = helpers.read_query(query)
             for result in results:
                 await ctx.send(result)
         else:
             # send permissions for selected role
             query = f"SELECT * FROM permissions WHERE role_id = {role_id}"
-            result = helpers.read_query('databases/permissions.sqlite', query)
+            result = helpers.read_query(query)
             try:
                 entry = result[0]
             except IndexError:
@@ -72,7 +78,7 @@ class Settings(commands.Cog):
             VALUES ({role_id}, {permission_level});
         """
         try:
-            helpers.execute_query('databases/permissions.sqlite', query)
+            helpers.execute_query(query)
         except Exception as e:
             if "UNIQUE" in str(e):
                 await ctx.send(f"Use `{self.bot.command_prefix}permissions update` instead")
@@ -90,7 +96,7 @@ class Settings(commands.Cog):
             SET permission_level = {permission_level}
             WHERE role_id = {role_id};
         """
-        helpers.execute_query('databases/permissions.sqlite', query)
+        helpers.execute_query(query)
         await ctx.send(f"Updated {role_id} permission level to {permission_level}")
 
     @permissions.command(pass_context=True)
@@ -101,7 +107,7 @@ class Settings(commands.Cog):
             DELETE FROM permissions
             WHERE role_id = {role_id};
         """
-        helpers.execute_query('databases/permissions.sqlite', query)
+        helpers.execute_query(query)
         await ctx.send(f"Removed permissions entry for {role_id}")
 
     @permissions.error
@@ -152,7 +158,7 @@ class Settings(commands.Cog):
         helpers.catch_api_error(data, 2)
         data = data['api_request']['api_key_details']
         arguments = (key, owner, data['alliance_id'], data['alliance_position'], data['daily_requests_remaining'])
-        helpers.execute_query('databases/keys.sqlite', query, arguments)
+        helpers.execute_query(query, arguments)
         await ctx.send(f"Saved API key entry for `{owner}` to database")
 
     @apikey.command(pass_context=True)
@@ -162,11 +168,11 @@ class Settings(commands.Cog):
             raise Exception(f"Missing arguments, correct syntax is `{self.bot.command_prefix}apikey get <owner>`")
         if owner == "all":
             query = "SELECT * FROM keys"
-            result = helpers.read_query('databases/keys.sqlite', query)
+            result = helpers.read_query('keys.sqlite', query)
             await ctx.send(result)
         else:
             query = "SELECT * FROM keys WHERE owner = ?"
-            result = helpers.read_query('databases/keys.sqlite', query, (owner,))
+            result = helpers.read_query(query, (owner,))
             if not result:
                 await ctx.send(f"No entry found for {owner}")
             else:
@@ -179,7 +185,7 @@ class Settings(commands.Cog):
             raise Exception(f"Missing arguments, correct syntax is `{self.bot.command_prefix}apikey update <owner>`")
         if owner == "all":
             query = "SELECT owner, key FROM keys"
-            result = helpers.read_query('databases/keys.sqlite', query)
+            result = helpers.read_query(query)
             if not result:
                 raise Exception("No API key entries found")
             owners = [entry[0] for entry in result]
@@ -197,12 +203,12 @@ class Settings(commands.Cog):
                 helpers.catch_api_error(data, 2)
                 data = data['api_request']['api_key_details']
                 arguments = (data['alliance_id'], data['alliance_position'], data['daily_requests_remaining'], owners[i])
-                helpers.execute_query('databases/keys.sqlite', query, arguments)
+                helpers.execute_query(query, arguments)
                 await ctx.send(f"Updated `{owners[i]}` API key entry")
             await ctx.send("Updated all API key entries")
         else:
             query = "SELECT key FROM keys WHERE owner = ?"
-            result = helpers.read_query('databases/keys.sqlite', query, (owner,))
+            result = helpers.read_query(query, (owner,))
             if not result:
                 raise Exception(f"API key entry for `{owner}` not found")
             key = result[0][0]
@@ -218,7 +224,7 @@ class Settings(commands.Cog):
             helpers.catch_api_error(data, 2)
             data = data['api_request']['api_key_details']
             arguments = (data['alliance_id'], data['alliance_position'], data['daily_requests_remaining'], owner)
-            helpers.execute_query('databases/keys.sqlite', query, arguments)
+            helpers.execute_query(query, arguments)
             await ctx.send(f"Updated `{owner}` API key entry")
     
     @apikey.command(pass_context=True)
@@ -228,7 +234,7 @@ class Settings(commands.Cog):
             DELETE FROM keys
             WHERE owner = ?;
         """
-        helpers.execute_query('databases/keys.sqlite', query, (owner,))
+        helpers.execute_query(query, (owner,))
         await ctx.send(f"Removed API key entry for `{owner}`")
 
 
@@ -252,7 +258,7 @@ class Settings(commands.Cog):
                 (?, ?, ?, ?);
         """
         arguments = (name, description, image_url, json.dumps(cost))
-        helpers.execute_query('databases/game_data.sqlite', query, arguments)
+        helpers.execute_query(query, arguments)
         await ctx.send("Added project data to database")
 
     @addproject.error

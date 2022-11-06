@@ -1,10 +1,16 @@
 import discord
 from discord.ext import commands
 import requests
-import json
 import sys
 from bs4 import BeautifulSoup
-sys.path.append('..')
+import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
 import helpers
 
 
@@ -189,7 +195,7 @@ class Nations(commands.Cog):
         else:
             query = f"SELECT * FROM raids WHERE score >= ? AND score <= ? AND total_loot_value > ? AND beige_turns <= ? AND open_slots >= ? AND alliance_id = 0 ORDER BY total_loot_value DESC LIMIT ?"
 
-        result = helpers.read_query('databases/raids.sqlite', query, (min_score, max_score, min_loot, max_beige_turns, min_open_slots, results))
+        result = helpers.read_query(query, (min_score, max_score, min_loot, max_beige_turns, min_open_slots, results))
         await ctx.send(f"**{len(result)}** nations found")
         for entry in result:
             text = f"""https://politicsandwar.com/nation/id={entry[0]}

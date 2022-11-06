@@ -6,11 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+project_path = os.getenv("PROJECT_PATH")
+
 intents = discord.Intents().all()
 bot = commands.Bot(command_prefix = os.getenv("PREFIX"), intents=intents)
 
 
-
+"""
 def get_cogs():
     # list all cogs
     for filename in os.listdir('./cogs'):
@@ -59,7 +61,7 @@ async def reload(ctx, cog=None):
             await ctx.send(edit_cog(bot.reload_extension, cog, "reload"))
     else:
         await ctx.send(edit_cog(bot.reload_extension, cog, "reload"))
-
+"""
 
 @bot.command()
 async def color(ctx, hex_code=None):
@@ -78,19 +80,6 @@ async def color(ctx, hex_code=None):
 async def online(ctx):
     # command to test if bot is running
     await ctx.send(f"Bot is online with latency {round(bot.latency, 3)}")
-
-
-@bot.command()
-async def code(ctx):
-    # counts lines of python code in the bot
-    total_lines = 0
-    for root, dirs, files, in os.walk("."):
-        for filename in files:
-            if filename.endswith(".py"):
-                path = '/'.join([root, filename])
-                with open(path, 'r') as f:
-                    total_lines += len(f.read().split('\n'))
-    await ctx.send(f"{bot.user.name} has {total_lines} lines of code")
 
 
 @bot.event
@@ -124,7 +113,7 @@ async def on_ready():
             permission_level INTEGER NOT NULL
         );
     """
-    helpers.execute_query('databases/permissions.sqlite', create_permissions_table)
+    helpers.execute_query(create_permissions_table)
     # create keys table
     create_keys_table = """
         CREATE TABLE IF NOT EXISTS keys (
@@ -135,7 +124,7 @@ async def on_ready():
             requests_remaining INTEGER
         );
     """
-    helpers.execute_query('databases/keys.sqlite', create_keys_table)
+    helpers.execute_query(create_keys_table)
     # create projects table
     create_projects_table = """
         CREATE TABLE IF NOT EXISTS projects (
@@ -145,29 +134,7 @@ async def on_ready():
             cost TEXT
         );
     """
-    helpers.execute_query('databases/game_data.sqlite', create_projects_table)
-    # create accounts table
-    create_accounts_table = """
-        CREATE TABLE IF NOT EXISTS accounts (
-            owner_discord_id INTEGER PRIMARY KEY,
-            owner_name TEXT,
-            owner_nation_id TEXT,
-            cash REAL DEFAULT 0,
-            food REAL DEFAULT 0,
-            coal REAL DEFAULT 0,
-            oil REAL DEFAULT 0,
-            uranium REAL DEFAULT 0,
-            lead REAL DEFAULT 0,
-            iron REAL DEFAULT 0,
-            bauxite REAL DEFAULT 0,
-            gasoline REAL DEFAULT 0,
-            munitions REAL DEFAULT 0,
-            steel REAL DEFAULT 0,
-            aluminum REAL DEFAULT 0
-        );
-    """
-    # create_accounts_table = "DROP TABLE accounts"
-    helpers.execute_query('databases/accounts.sqlite', create_accounts_table)
+    helpers.execute_query(create_projects_table)
     create_prices_table = """
         CREATE TABLE IF NOT EXISTS prices (
             resource TEXT,
@@ -176,13 +143,13 @@ async def on_ready():
             avg_price INTEGER
         );
     """
-    helpers.execute_query('databases/game_data.sqlite', create_prices_table)
+    helpers.execute_query(create_prices_table)
   
 
 
 # load all cogs
 print("Loading cogs...")
-for filename in os.listdir('./cogs'):
+for filename in os.listdir(project_path + 'cogs'):
     if filename.endswith('.py'):
         bot.load_extension(f'cogs.{filename[:-3]}')
         print(f"- {filename}")
@@ -190,4 +157,4 @@ print("Done!")
 
 
 
-bot.run(helpers.get_data()['token'])
+bot.run(os.getenv("BOT_TOKEN"))

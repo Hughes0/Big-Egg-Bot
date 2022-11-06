@@ -2,11 +2,16 @@ import discord
 from discord.ext import commands
 import requests
 import datetime
-import random
 import concurrent.futures
-from cogs.calculations import nation_income_all_cities, nation_income_one_city
 import sys
-sys.path.append("..")
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append(os.getenv("PROJECT_PATH"))
+
+from cogs.calculations import nation_income_one_city
 import helpers
 
 
